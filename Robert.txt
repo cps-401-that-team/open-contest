@@ -1,1 +1,4 @@
-testing branch
+Check  Branch  | git branch
+Create Branch  | git branch   [new branch name]
+Change Branch  | git checkout [branch name]
+Push to Repo   | git push --set-upstream origin [branch name]
