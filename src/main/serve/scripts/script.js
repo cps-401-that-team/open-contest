@@ -415,6 +415,7 @@ Contest page
         var endDate = $("#contest-end-date").val();
         var endTime = $("#contest-end-time").val();
         var scoreboardOffTime = $("#scoreboard-off-time").val();
+        var tiebreaker = $("#tie-breaker-bool").val();
 
         var start = new Date(`${startDate} ${startTime}`).getTime();
         var end = new Date(`${endDate} ${endTime}`).getTime();
@@ -446,7 +447,7 @@ Contest page
             problems.push(newProblem);
         }
 
-        $.post("/editContest", {id: id, name: name, start: start, end: end, scoreboardOff: endScoreboard, problems: JSON.stringify(problems)}, id => {
+        $.post("/editContest", {id: id, name: name, start: start, end: end,tiebreaker:tiebreaker, scoreboardOff: endScoreboard, problems: JSON.stringify(problems)}, id => {
             if (window.location.pathname == "/contests/new") {
                 window.location = `/contests/${id}`;
             } else {

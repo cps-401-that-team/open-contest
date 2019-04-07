@@ -34,17 +34,19 @@ class ProblemCard(UIElement):
 def editContest(params, user):
     id = params[0] if params else None
     contest = Contest.get(id)
-    
     title = "New Contest"
     chooseProblem = ""
     existingProblems = []
     start = time.time() * 1000
     end = (time.time() + 3600) * 1000
+    scoreboardOff = end
+    tiebreaker =  True 
     if contest:
         title = contest.name
         start = contest.start
         end = contest.end
         scoreboardOff = contest.scoreboardOff
+        tiebreaker = contest.tiebreaker
         chooseProblem = div(cls="actions", contents=[
             h.button("+ Choose Problem", cls="button", onclick="chooseProblemDialog()")
         ])
@@ -67,8 +69,11 @@ def editContest(params, user):
             div(cls="problem-cards", contents=problems)
         ]
     
+        
+
     return Page(
         h.input(type="hidden", id="contest-id", value=id),
+        h.input(type="hidden", id="test", value="test"),
         h.input(type="hidden", id="pageId", value="Contest"),
         h2(title, cls="page-title"),
         chooseProblem,
@@ -96,8 +101,18 @@ def editContest(params, user):
                     h.label(**{"for": "contest-end-time", "contents":"End Time"}),
                     h.input(cls="form-control", name="contest-end-time", id="contest-end-time", type="time")
                 ]),
+                # Tie breaker
+                h.input(type="hidden", id="tiebreaker", value=tiebreaker),
+                div(cls="form-group col-6", contents=[
+                    h.label(**{"for": "tie-breaker-bool", "contents":"Sample Data Breaks Ties"}),
+                    h.select(cls="form-control problem-choice", name="tie-breaker-bool", id="tie-breaker-bool", contents=[
+                        h.option(("Yes")if tiebreaker else ("No"), value=("Yes")if tiebreaker else ("No")),
+                        h.option(("Yes")if not tiebreaker else ("No"), value=("Yes")if not tiebreaker else ("No"))
+                    ])
+                ]),
+                # Remove for spacing div(cls="form-group col-6"),
+                
                 h.input(type="hidden", id="scoreboardOff", value=scoreboardOff),
-                div(cls="form-group col-6"),
                 div(cls="form-group col-6", contents=[
                     h.label(**{"for": "scoreboard-off-time", "contents":"Turn Scoreboard Off Time"}),
                     h.input(cls="form-control", name="scoreboard-off-time", id="scoreboard-off-time", type="time")
@@ -109,6 +124,7 @@ def editContest(params, user):
         ])),
         *existingProblems
     )
+    
 
 register.web("/contests$", "admin", listContests)
 register.web("/contests/([a-f0-9-]*)", "admin", editContest)
