@@ -42,12 +42,18 @@ def editContest(params, user):
     end = (time.time() + 3600) * 1000
     scoreboardOff = end
     showProblInfoBlocks = ""
+    showProblInfoBlocks_option = [
+        h.option("True", value="True"),
+        h.option("False", value="False")
+    ]
     if contest:
         title = contest.name
         start = contest.start
         end = contest.end
-        scoreboardOff = contest.scoreboardOff
+        scoreboardOff = contest.scoreboardOff        
         showProblInfoBlocks = contest.showProblInfoBlocks
+        if(showProblInfoBlocks == "False"): 
+            showProblInfoBlocks_option = [h.option("False", value="False"),h.option("True", value="True")]
         chooseProblem = div(cls="actions", contents=[
             h.button("+ Choose Problem", cls="button", onclick="chooseProblemDialog()")
         ])
@@ -102,7 +108,7 @@ def editContest(params, user):
                 h.input(type="hidden", id="showProblInfoBlocks", value=showProblInfoBlocks),                
                 div(cls="form-group col-6", contents=[
                     h.label(**{"for": "show-problem-info-blocks", "contents":"Show Problem Info Blocks"}),
-                    h.input(cls="form-control", name="show-problem-info-blocks", id="show-problem-info-blocks", type="text")
+                    h.select(cls="form-control custom-select", name="show-problem-info-blocks", id="show-problem-info-blocks", contents=showProblInfoBlocks_option)
                 ]),
                 h.input(type="hidden", id="scoreboardOff", value=scoreboardOff),                
                 div(cls="form-group col-6", contents=[
