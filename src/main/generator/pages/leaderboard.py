@@ -1,9 +1,10 @@
-from code.util.db import Submission, User, Contest
+from code.util.db import Submission, User, Contest, Problem
 from code.generator.lib.htmllib import *
 from code.generator.lib.page import *
 import logging
 from code.util import register
 import time
+from datetime import datetime
 
 def leaderboard(params, user):
     contest = Contest.getCurrent() or Contest.getPast()
@@ -65,6 +66,7 @@ def leaderboard(params, user):
 
     problemSummaryDisplay = []
     for problem in contest.problems:
+        
         problemSummaryDisplay.append(h.tr(
             h.td(problem.title),
             h.td(problemSummary[problem.id][0], cls="center"),
@@ -73,6 +75,9 @@ def leaderboard(params, user):
 
     return Page(
         h2("Leaderboard", cls="page-title"),
+        div(cls="actions", contents=[
+            h.button("Correct Board", cls="button create-message",onclick="window.location.href='/correctboard'")
+        ]),
         h.table(
             h.thead(
                 h.tr(
@@ -99,6 +104,67 @@ def leaderboard(params, user):
             ),
             h.tbody(
                 *problemSummaryDisplay
+            )
+
+        )
+    )
+
+def correctboard(params, user):
+    contest = Contest.getCurrent() or Contest.getPast()
+    if not contest:
+        return Page(
+            h1("&nbsp;"),
+            h1("No Contest Available", cls="center")
+        )
+    elif contest.scoreboardOff <= time.time() * 1000 and not user.isAdmin():
+        return Page(
+            h1("&nbsp;"),
+            h1("Scoreboard is off.", cls="center")
+        )
+
+    start = contest.start
+    end = contest.end
+
+    correct = []
+    print("subs") # DEBUG
+    print(Submission.all()[0].__dict__)
+    # Check if in current contest as well
+    for sub in Submission.all():
+        #print(sub.__dict__) # DEBUG
+        print("\nsub.id\n",sub.id,"\nsub.user.id\n",sub.user.id,"\nsub.result\n",sub.result) # DEBUG
+        if start <= sub.timestamp <= end and sub.result == "ok" and not sub.user.isAdmin(): # USE THIS TOO
+            new = { "timestamp" :sub.timestamp,
+                    "user_id"   :User.get(sub.user.id).username,
+                    "problem_id":Problem.get(sub.problem.id).title}
+            correct.append(new)
+            
+                
+    # TODO: Check for mutiple subsmissions
+    
+    correct.sort(key=lambda item:item['timestamp'], reverse=False)
+    for c in correct:
+        c["timestamp"] = datetime.utcfromtimestamp(c["timestamp"] / 1000).strftime('%Y-%m-%d %H:%M:%S')
+
+    problemCorrectDisplay = []
+    for c in correct:
+        problemCorrectDisplay.append(h.tr(
+            h.td(c["timestamp"]),
+            h.td(c["user_id"], cls="center"),
+            h.td(c["problem_id"], cls="center")
+        ))
+
+    return Page(
+        h2("Correct Summary", cls="page-title"),
+        h.table(
+            h.thead(
+                h.tr(
+                    h.th("Date/Time", cls="center"),
+                    h.th("Contestent", cls="center"),
+                    h.th("Problem", cls="center"),
+                )
+            ),
+            h.tbody(
+                *problemCorrectDisplay
             )
 
         )
@@ -164,3 +230,4 @@ def score(submissions: list, contestStart, problemSummary) -> tuple:
     return solvedProbs, sampleProbs, int(penPoints)
 
 register.web("/leaderboard", "loggedin", leaderboard)
+register.web("/correctboard", "admin", correctboard)
