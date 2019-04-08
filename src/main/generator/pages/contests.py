@@ -43,8 +43,8 @@ def editContest(params, user):
     scoreboardOff = end
     showProblInfoBlocks = ""
     showProblInfoBlocks_option = [
-        h.option("True", value="True"),
-        h.option("False", value="False")
+        h.option("On", value="On"),
+        h.option("Off", value="Off")
     ]
     if contest:
         title = contest.name
@@ -52,8 +52,8 @@ def editContest(params, user):
         end = contest.end
         scoreboardOff = contest.scoreboardOff        
         showProblInfoBlocks = contest.showProblInfoBlocks
-        if(showProblInfoBlocks == "False"): 
-            showProblInfoBlocks_option = [h.option("False", value="False"),h.option("True", value="True")]
+        if(showProblInfoBlocks == "Off"): 
+            showProblInfoBlocks_option = [h.option("Off", value="Off"),h.option("On", value="On")]
         chooseProblem = div(cls="actions", contents=[
             h.button("+ Choose Problem", cls="button", onclick="chooseProblemDialog()")
         ])

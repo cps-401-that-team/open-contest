@@ -48,10 +48,13 @@ def viewProblem(params, user):
             return ""
         if problem not in Contest.getCurrent().problems:
             return ""
-    if(contest.showProblInfoBlocks == "False"):
+    if(contest.showProblInfoBlocks == "Off"):
         return Page(
             h.input(type="hidden", id="problem-id", value=problem.id),
-            h2(problem.title, cls="page-title"),            
+            h2(problem.title, cls="page-title"), 
+            div(cls="problem-description", contents=[
+                div(cls="samples", contents=list(map(lambda x: getSample(x[0], x[1]), zip(problem.sampleData, range(problem.samples)))))
+            ]),           
             CodeEditor(),
             div(cls="align-right", contents=[
                 h.button("Test Code", cls="button test-samples button-white"),
