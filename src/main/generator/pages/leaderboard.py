@@ -76,7 +76,7 @@ def leaderboard(params, user):
     return Page(
         h2("Leaderboard", cls="page-title"),
         div(cls="actions", contents=[
-            h.button("Correct Board", cls="button create-message",onclick="window.location.href='/correctboard'")
+            h.button("Correct Log Report", cls="button create-message",onclick="window.location.href='/correctboard'")
         ]),
         h.table(
             h.thead(
@@ -126,22 +126,25 @@ def correctboard(params, user):
     end = contest.end
 
     correct = []
-    print("subs") # DEBUG
-    print(Submission.all()[0].__dict__)
-    # Check if in current contest as well
     for sub in Submission.all():
-        #print(sub.__dict__) # DEBUG
-        print("\nsub.id\n",sub.id,"\nsub.user.id\n",sub.user.id,"\nsub.result\n",sub.result) # DEBUG
         if start <= sub.timestamp <= end and sub.result == "ok" and not sub.user.isAdmin(): # USE THIS TOO
-            new = { "timestamp" :sub.timestamp,
-                    "user_id"   :User.get(sub.user.id).username,
-                    "problem_id":Problem.get(sub.problem.id).title}
-            correct.append(new)
+            username = User.get(sub.user.id).username
+            title    = Problem.get(sub.problem.id).title
+            notinlist = True
             
+            for c in correct:
+                if c.get("username") == username and c.get("title") == title and c.get("timestamp") > sub.timestamp:
+                    c["timestamp"] = sub.timestamp
+                    notinlist = False
+                    break
+                elif c.get("username") == username and c.get("title") == title and c.get("timestamp") < sub.timestamp:
+                    notinlist = False
+                    break
+            
+            if notinlist: correct.append({ "timestamp":sub.timestamp,"username":username,"title":title})
                 
-    # TODO: Check for mutiple subsmissions
-    
-    correct.sort(key=lambda item:item['timestamp'], reverse=False)
+     
+    correct.sort(key=lambda item:item['timestamp'], reverse=True)
     for c in correct:
         c["timestamp"] = datetime.utcfromtimestamp(c["timestamp"] / 1000).strftime('%Y-%m-%d %H:%M:%S')
 
@@ -149,16 +152,16 @@ def correctboard(params, user):
     for c in correct:
         problemCorrectDisplay.append(h.tr(
             h.td(c["timestamp"]),
-            h.td(c["user_id"], cls="center"),
-            h.td(c["problem_id"], cls="center")
+            h.td(c["username"], cls="center"),
+            h.td(c["title"], cls="center")
         ))
 
     return Page(
-        h2("Correct Summary", cls="page-title"),
+        h2("Correct Log Report", cls="page-title"),
         h.table(
             h.thead(
                 h.tr(
-                    h.th("Date/Time", cls="center"),
+                    h.th("Date/Time"),
                     h.th("Contestent", cls="center"),
                     h.th("Problem", cls="center"),
                 )
