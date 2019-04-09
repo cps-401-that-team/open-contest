@@ -671,10 +671,20 @@ Judging Page
         var result = $(`.result-choice.${id}`).val();
         $.post("/changeResult", {id: id, result: result}, result => {
             if (result == "ok") {
-                window.location.reload();
+                window.location.reload();                
             } else {
                 alert(result);
             }
+        })
+    }
+    function changeSubmissionStatus(id) {
+        var result = $(`.submission-status.${id}`).val();
+        $.post("/changeStatus", {id: id, result: result}, result => {            
+            if (result == "ok") {
+                window.location.reload();
+            } else {
+                alert(result);
+            }          
         })
     }
 

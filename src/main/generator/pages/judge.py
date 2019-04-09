@@ -1,5 +1,5 @@
 from code.util import register
-from code.util.db import Contest, Problem, Submission
+from code.util.db import Contest, Problem, Submission, User
 from code.generator.lib.htmllib import *
 from code.generator.lib.page import *
 
@@ -31,6 +31,10 @@ verdict_name = {
     "extra_output": "Extra Output",
     "pending": "Pending..."
 }
+status_name = {
+    "review": "Review",
+    "judged": "Judged"    
+}
 
 def resultOptions(result):
     ans = []
@@ -39,6 +43,15 @@ def resultOptions(result):
             ans.append(h.option(verdict_name[res], value=res, selected="selected"))
         else:
             ans.append(h.option(verdict_name[res], value=res))
+    return ans
+
+def statusOptions(status):
+    ans = []
+    for res in status_name:        
+        if status == res:
+            ans.append(h.option(status_name[res], value=res, selected="selected"))
+        else:
+            ans.append(h.option(status_name[res], value=res))
     return ans
 
 class TestCaseTab(UIElement):
@@ -74,9 +87,14 @@ class TestCaseData(UIElement):
         ])
 
 class SubmissionCard(UIElement):
-    def __init__(self, submission: Submission):
+    def __init__(self, submission: Submission, user: User):
         subTime = submission.timestamp
         probName = submission.problem.title
+        # id = params["id"]
+        # print(user.id == "6a4cc8df-ae44-48e7-8b00-01e68a6c8812")
+        # print(user.username)        
+        submission.checkout = user.id
+        submission.save()
         cls = "red" if submission.result != "ok" else ""
         self.html = div(cls="modal-content", contents=[
             div(cls=f"modal-header {cls}", contents=[
@@ -97,6 +115,12 @@ class SubmissionCard(UIElement):
                         *resultOptions(submission.result)
                     ])
                 ),
+                h.strong(" Submission status: ",
+                    h.select(cls=f"submission-status {submission.id}", onchange=f"changeSubmissionStatus('{submission.id}')", contents=[
+                        *statusOptions(submission.status)
+                    ])
+                ),
+                h.strong(" Checkout: {}".format(user.username)),
                 h.br(),
                 h.br(),
                 h.button("Rejudge", type="button", onclick=f"rejudge('{submission.id}')", cls="btn btn-primary rejudge"),
@@ -171,7 +195,7 @@ def judge(params, user):
     )
 
 def judge_submission(params, user):
-    return SubmissionCard(Submission.get(params[0]))
+    return SubmissionCard(Submission.get(params[0]),user)
 
 register.web("/judgeSubmission/([a-zA-Z0-9-]*)", "admin", judge_submission)
 register.web("/judge", "admin", judge)

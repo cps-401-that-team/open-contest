@@ -16,6 +16,7 @@ def addSubmission(probId, lang, code, user, type):
     sub.user = user
     sub.timestamp = time.time() * 1000
     sub.type = type
+    sub.status = "Review"
     if type == "submit":
         sub.save()
     else:
@@ -125,6 +126,16 @@ def changeResult(params, setHeader, user):
     sub.save()
     return "ok"
 
+def changeStatus(params, setHeader, user):
+    id = params["id"]
+    sub = Submission.get(id)
+    if not sub:
+        return "Error: incorrect id"
+    sub.status = params["result"]
+    sub.save()
+    return "ok"
+
+
 def rejudge(params, setHeader, user):
     id = params["id"]
     submission = Submission.get(id)
@@ -135,4 +146,5 @@ def rejudge(params, setHeader, user):
 
 register.post("/submit", "loggedin", submit)
 register.post("/changeResult", "admin", changeResult)
+register.post("/changeStatus", "admin", changeStatus)
 register.post("/rejudge", "admin", rejudge)
