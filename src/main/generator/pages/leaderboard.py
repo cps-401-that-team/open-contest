@@ -124,7 +124,7 @@ def correctboard(params, user):
 
     start = contest.start
     end = contest.end
-
+ 
     correct = []
     for sub in Submission.all():
         if start <= sub.timestamp <= end and sub.result == "ok" and not sub.user.isAdmin(): # USE THIS TOO
