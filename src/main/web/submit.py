@@ -123,12 +123,6 @@ def runCode(sub):
     sub.outputs = outputs
     sub.answers = answers
     sub.errors = errors
-    print(sub.__dict__)
-    print(sub.results)
-    print(sub.inputs)
-    print(sub.outputs)
-    print(sub.answers)
-    print(sub.errors)
 
     if sub.type == "submit":
         sub.save()

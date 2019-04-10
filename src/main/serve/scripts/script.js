@@ -224,7 +224,7 @@ Problem page
                     results += `<div id="tabs-${i}">
                     <div class="row">
                         <div class="col-12">
-                            <h4>Input</h4>
+                            <h4>Your Input</h4>
                             <code>${input.replace(/\n/g, "<br/>").replace(/ /g, "&nbsp;")}</code>
                         </div>
                         <div class="col-12">
