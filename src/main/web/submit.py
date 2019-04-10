@@ -7,7 +7,7 @@ import shutil
 import re
 from uuid import uuid4
 
-def addSubmission(probId, lang, code, user, type):
+def addSubmission(probId, lang, code, user, type, custominput):
     sub = Submission()
     sub.problem = Problem.get(probId)
     sub.language = lang
@@ -16,8 +16,12 @@ def addSubmission(probId, lang, code, user, type):
     sub.user = user
     sub.timestamp = time.time() * 1000
     sub.type = type
+
     if type == "submit":
         sub.save()
+    elif type == "custom":
+        sub.custominput = custominput
+        sub.id = str(uuid4())
     else:
         sub.id = str(uuid4())
     return sub
@@ -51,11 +55,24 @@ def runCode(sub):
         f.write(sub.code.encode("utf-8"))
     
     prob = sub.problem
-    tests = prob.samples if sub.type == "test" else prob.tests
     
+    if sub.type == "test":
+        tests = prob.samples 
+    elif sub.type == "custom":
+        tests = 1
+    else:
+        tests = prob.tests     
     # Copy the input over to the tmp folder for the runner
+    
+    
     for i in range(tests):
-        shutil.copyfile(f"/db/problems/{prob.id}/input/in{i}.txt", f"/tmp/{sub.id}/in{i}.txt")
+        if sub.type != "custom":
+            shutil.copyfile(f"/db/problems/{prob.id}/input/in{i}.txt", f"/tmp/{sub.id}/in{i}.txt")
+        else:
+            with open(f"/tmp/{sub.id}/in{i}.txt", "w") as text_file:
+                text_file.write(sub.custominput)
+        
+
 
     # Output files will go here
     os.mkdir(f"/tmp/{sub.id}/out")
@@ -72,7 +89,10 @@ def runCode(sub):
     result = "ok"
 
     for i in range(tests):
-        inputs.append(sub.problem.testData[i].input)
+        if sub.type == "custom":
+            inputs.append(sub.custominput)
+        else:
+            inputs.append(sub.problem.testData[i].input)
         errors.append(readFile(f"/tmp/{sub.id}/out/err{i}.txt"))
         outputs.append(readFile(f"/tmp/{sub.id}/out/out{i}.txt"))
         answers.append(sub.problem.testData[i].output)
@@ -82,6 +102,8 @@ def runCode(sub):
             res = "wrong_answer"
         if res == None:
             res = "tle"
+        if sub.type == "custom":
+            res = "ok"
         results.append(res)
 
         # Make result the first incorrect result
@@ -101,6 +123,12 @@ def runCode(sub):
     sub.outputs = outputs
     sub.answers = answers
     sub.errors = errors
+    print(sub.__dict__)
+    print(sub.results)
+    print(sub.inputs)
+    print(sub.outputs)
+    print(sub.answers)
+    print(sub.errors)
 
     if sub.type == "submit":
         sub.save()
@@ -112,7 +140,8 @@ def submit(params, setHeader, user):
     lang   = params["language"]
     code   = params["code"]
     type   = params["type"]
-    submission = addSubmission(probId, lang, code, user, type)
+    custominput = params.get("input")
+    submission = addSubmission(probId, lang, code, user, type, custominput)
     runCode(submission)
     return submission.toJSON()
 
