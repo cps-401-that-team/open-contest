@@ -77,19 +77,17 @@ def markDiffLines(list1,list2):
             #find matching sections of strings
             for match in SequenceMatcher(None, big[i], small[i]).get_matching_blocks():
            
-                if match.a < len(big[i]):
+                if True or match.a < len(big[i]):
 
                     #mark sections that differ from the other string
                     tempbig += ((spanred+ big[i][bl:match.a]+ end) if len(big[i][bl:match.a]) > 0 else "") + big[i][match.a:match.a+match.size]
-                    bl = match.b+match.size
+                 
+                    bl = match.a+match.size
+                    
                                                     
                     tempsmall += (( spanred+ small[i][sl:match.b]+ end) if len(small[i][sl:match.b]) > 0 else "") + small[i][match.b:match.b+match.size]
                     sl = match.b+match.size
                 
-                else:
-                    if len(tempbig) == 0:
-                        tempsmall = spanred + small[i] +  end
-                        tempbig = spanred+ big[i] +  end
 
             big[i] = tempbig
             small[i] = tempsmall
@@ -116,7 +114,7 @@ class TestCaseData(UIElement):
         #restore format
         answer = ''.join(answer)
         output = ''.join(output)
-
+        
         
         self.html = div(id=f"tabs-{sub.id}-{num}", contents=[
             div(cls="row", contents=[
