@@ -2,7 +2,7 @@ from code.util import register
 from code.util.db import Contest, Problem, Submission
 from code.generator.lib.htmllib import *
 from code.generator.lib.page import *
-
+from difflib import *
 import logging
 from datetime import datetime
 
@@ -51,9 +51,73 @@ class TestCaseTab(UIElement):
             ])
         )
 
+def markDiffLines(list1,list2):
+
+    #diff wrapers
+    spanred = '<span style="background:red">' #red=lines are different
+    spangreen = '<span style="background:green">'#green = line only exists in this list
+    end = '</span>'
+    rows = 0
+
+    if len(list1) > len(list2):
+        rows = len(list1)
+        big = list1
+        small = list2
+    else:
+        rows = len(list2)
+        big = list2
+        small = list1
+
+    for i in range(rows):
+        if i < len(small):
+            bl = 0
+            sl = 0
+            tempbig = ''
+            tempsmall = ''
+            #find matching sections of strings
+            for match in SequenceMatcher(None, big[i], small[i]).get_matching_blocks():
+           
+                if match.a < len(big[i]):
+
+                    #mark sections that differ from the other string
+                    tempbig += ((spanred+ big[i][bl:match.a]+ end) if len(big[i][bl:match.a]) > 0 else "") + big[i][match.a:match.a+match.size]
+                    bl = match.b+match.size
+                                                    
+                    tempsmall += (( spanred+ small[i][sl:match.b]+ end) if len(small[i][sl:match.b]) > 0 else "") + small[i][match.b:match.b+match.size]
+                    sl = match.b+match.size
+                
+                else:
+                    if len(tempbig) == 0:
+                        tempsmall = spanred + small[i] +  end
+                        tempbig = spanred+ big[i] +  end
+
+            big[i] = tempbig
+            small[i] = tempsmall
+
+        else:
+            big[i] = spangreen+big[i].replace("\n", "</span>\n")
+            if big[i][-1] != '\n':
+                big[i] = big[i]+'</span>\n'
+
+
+
+
 class TestCaseData(UIElement):
     def __init__(self, x, sub):
         num, input, output, error, answer = x
+
+        #prepare formmat for function
+        answer = answer.replace(" ", "&nbsp;").splitlines(keepends=True)
+        output = output.replace(" ", "&nbsp;").splitlines(keepends=True)
+
+        #modify output and answer strings to display differences by color
+        markDiffLines(output,answer)
+        
+        #restore format
+        answer = ''.join(answer)
+        output = ''.join(output)
+
+        
         self.html = div(id=f"tabs-{sub.id}-{num}", contents=[
             div(cls="row", contents=[
                 div(cls="col-12", contents=[
@@ -64,11 +128,12 @@ class TestCaseData(UIElement):
             div(cls="row", contents=[
                 div(cls="col-6", contents=[
                     h.h4("Output"),
-                    h.code(output.replace(" ", "&nbsp;").replace("\n", "<br/>"))
+                    h.code(output.replace("\n", "<br/>"))
+                    
                 ]),
                 div(cls="col-6", contents=[
                     h.h4("Correct Answer"),
-                    h.code(answer.replace(" ", "&nbsp;").replace("\n", "<br/>"))
+                    h.code(answer.replace("\n", "<br/>"))
                 ])
             ])
         ])
