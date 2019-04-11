@@ -35,6 +35,11 @@ status_name = {
     "review": "Review",
     "judged": "Judged"    
 }
+override_options = {
+    "": "-",
+    "yes": "Yes",
+    "no": "No"
+}
 
 def resultOptions(result):
     ans = []
@@ -45,10 +50,16 @@ def resultOptions(result):
             ans.append(h.option(verdict_name[res], value=res))
     return ans
 
-def statusOptions(status):
+def overrideOptions():
+    ans = []
+    for res in override_options:        
+        ans.append(h.option(override_options[res], value=res))
+    return ans
+
+def statusOptions(result):
     ans = []
     for res in status_name:        
-        if status == res:
+        if (res == "judged" and (result == "ok" or result == "runtime_error" or result == "tle")):
             ans.append(h.option(status_name[res], value=res, selected="selected"))
         else:
             ans.append(h.option(status_name[res], value=res))
@@ -90,9 +101,7 @@ class SubmissionCard(UIElement):
     def __init__(self, submission: Submission, user: User):
         subTime = submission.timestamp
         probName = submission.problem.title
-        # id = params["id"]
-        # print(user.id == "6a4cc8df-ae44-48e7-8b00-01e68a6c8812")
-        # print(user.username)        
+        version = submission.version       
         submission.checkout = user.id
         submission.save()
         cls = "red" if submission.result != "ok" else ""
@@ -117,7 +126,7 @@ class SubmissionCard(UIElement):
                 ),
                 h.strong(" Submission status: ",
                     h.select(cls=f"submission-status {submission.id}", onchange=f"changeSubmissionStatus('{submission.id}')", contents=[
-                        *statusOptions(submission.status)
+                        *statusOptions(submission.result)
                     ])
                 ),
                 h.strong(" Checkout: {}".format(user.username)),
@@ -132,6 +141,26 @@ class SubmissionCard(UIElement):
                     h.ul(*map(lambda x: TestCaseTab(x, submission), enumerate(submission.results))),
                     *map(lambda x: TestCaseData(x, submission), zip(range(submission.problem.tests), submission.inputs, submission.outputs, submission.errors, submission.answers))
                 ])
+            ])
+        ])
+
+class SubmissionCardPopup(UIElement):
+    def __init__(self, submission: Submission, user: User):
+        subTime = submission.timestamp
+        probName = submission.problem.title
+        # version = submission.version       
+        # submission.checkout = user.id
+        # submission.save()
+        cls = "red" if submission.result != "ok" else ""
+        self.html = div(cls="modal-content", contents=[            
+            div(cls="modal-body", contents=[
+                h.strong("Warning: {} is has currently checked out this submission".format(User.get(submission.checkout))),
+                h.br(),
+                h.strong("Do you want to override?",
+                    h.select(cls="change-checkout", onchange=f"checkout('{user.id}', '{submission.id}')", contents=[
+                        *overrideOptions()
+                    ])
+                ),                
             ])
         ])
 
@@ -152,6 +181,8 @@ class SubmissionRow(UIElement):
                 h.i("&nbsp;", cls=f"fa fa-{icons[sub.result]}"),
                 h.span(verdict_name[sub.result])
             ),
+            h.td(sub.status),  
+            # h.td(User.get(sub.checkout)),          
             onclick=f"submissionPopup('{sub.id}')"
         )
 
@@ -165,7 +196,9 @@ class SubmissionTable(UIElement):
                     h.th("Problem"),
                     h.th("Time"),
                     h.th("Language"),
-                    h.th("Result")
+                    h.th("Result"),
+                    h.th("Submission Status"),
+                    h.th("Checkout")
                 )
             ),
             h.tbody(
@@ -184,7 +217,7 @@ def judge(params, user):
     
     return Page(
         h2("Judge Submissions", cls="page-title"),
-        div(id="judge-table", contents=[
+        div(id="judge-table", align="left", contents=[
             SubmissionTable(cont)
         ]),
         div(cls="modal", tabindex="-1", role="dialog", contents=[
@@ -195,7 +228,14 @@ def judge(params, user):
     )
 
 def judge_submission(params, user):
-    return SubmissionCard(Submission.get(params[0]),user)
+    if(Submission.get(params[0]).checkout == None):
+        return SubmissionCard(Submission.get(params[0]),user)
+    else:
+        return SubmissionCardPopup(Submission.get(params[0]),user)
+
+def judge_override(params, user):    
+    return SubmissionCard(Submission.get(params[0]),user)    
 
 register.web("/judgeSubmission/([a-zA-Z0-9-]*)", "admin", judge_submission)
+register.web("/judgeOverride/([a-zA-Z0-9-]*)", "admin", judge_override)
 register.web("/judge", "admin", judge)

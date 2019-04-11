@@ -677,6 +677,18 @@ Judging Page
             }
         })
     }
+    function checkout(user_id,subm_id){
+        var result = $(`.change-checkout`).val();
+        $.post("/changeCheckout", {user_id: user_id, subm_id:subm_id, result: result}, result => {            
+            if (result == "ok") {                
+                overridePopup(subm_id);
+            } else if(result == "noChange") {
+                window.location.reload();
+            } else{
+                alert(result);
+            }      
+        })
+    }
     function changeSubmissionStatus(id) {
         var result = $(`.submission-status.${id}`).val();
         $.post("/changeStatus", {id: id, result: result}, result => {            
@@ -687,7 +699,14 @@ Judging Page
             }          
         })
     }
-
+    function overridePopup(id) {
+        $.post(`/judgeOverride/${id}`, {}, data => {
+            $(".modal-dialog").html(data);
+            $(".result-tabs").tabs();
+            fixFormatting();
+            $(".modal").modal();
+        });
+    }
     function submissionPopup(id) {
         $.post(`/judgeSubmission/${id}`, {}, data => {
             $(".modal-dialog").html(data);
