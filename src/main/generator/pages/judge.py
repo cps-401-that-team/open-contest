@@ -182,7 +182,7 @@ class SubmissionRow(UIElement):
                 h.span(verdict_name[sub.result])
             ),
             h.td(sub.status),  
-            # h.td(User.get(sub.checkout)),          
+            h.td(User.get(sub.checkout)),          
             onclick=f"submissionPopup('{sub.id}')"
         )
 

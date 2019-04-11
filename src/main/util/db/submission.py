@@ -42,7 +42,7 @@ class Submission:
             self.errors      = []
             self.answers     = []
             self.result      = []
-            self.status      = "Review"
+            self.status      = "review"
             self.checkout    = None
             self.version     = 0
 

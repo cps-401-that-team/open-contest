@@ -16,7 +16,7 @@ def addSubmission(probId, lang, code, user, type):
     sub.user = user
     sub.timestamp = time.time() * 1000
     sub.type = type
-    sub.status = "Review"
+    sub.status = "review"
     if type == "submit":
         sub.save()
     else:
@@ -90,6 +90,10 @@ def runCode(sub):
             result = res
 
     sub.result = result
+    if(sub.result == "tle" or sub.result == "runtime_error" or sub.result == "ok"):
+        sub.status == "judged"
+    if(sub.result == "wrong_answer" or sub.result == "extra_output"):
+        sub.result == "pending"
     if readFile(f"/tmp/{sub.id}/result.txt") == "compile_error\n":
         sub.results = "compile_error"
         sub.delete()
