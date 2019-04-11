@@ -89,9 +89,9 @@ def runCode(sub):
         if res != "ok" and result == "ok":
             result = res
 
-    sub.result = result
+    sub.result = result    
     if(sub.result == "tle" or sub.result == "runtime_error" or sub.result == "ok"):
-        sub.status == "judged"
+        sub.status = "judged"
     if(sub.result == "wrong_answer" or sub.result == "extra_output"):
         sub.result == "pending"
     if readFile(f"/tmp/{sub.id}/result.txt") == "compile_error\n":
@@ -123,10 +123,15 @@ def submit(params, setHeader, user):
 
 def changeResult(params, setHeader, user):
     id = params["id"]
-    sub = Submission.get(id)
+    vers = params["version"]
+    sub = Submission.get(id)    
+    if(sub.version != int(vers)):
+        return "vErr"    
     if not sub:
         return "Error: incorrect id"
     sub.result = params["result"]
+    sub.checkout = None
+    sub.version += 1
     sub.save()
     return "ok"
 
@@ -147,10 +152,15 @@ def checkout(params, setHeader, user):
 
 def changeStatus(params, setHeader, user):
     id = params["id"]
-    sub = Submission.get(id)
+    vers = params["version"]
+    sub = Submission.get(id)    
+    if(sub.version != int(vers)):
+        return "vErr"
     if not sub:
         return "Error: incorrect id"
     sub.status = params["result"]
+    sub.checkout = None
+    sub.version += 1
     sub.save()
     return "ok"
 

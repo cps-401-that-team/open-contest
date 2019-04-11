@@ -471,12 +471,7 @@ Leaderboard Page
     table {
         box-shadow: 0 2px 10px 0 rgba(0,0,0,.2);
         width: 100%;
-        background-color: white; 
-        /* table-layout: fixed;               */
-        /* display: inline;
-        box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        -webkit-box-sizing: border-box; */
+        background-color: white;         
     }
     thead {
         border-bottom: 2px solid #b4e0c0;
@@ -490,15 +485,7 @@ Leaderboard Page
         background-color: #f4f4f4;
     }
     td, th {
-        padding: 15px;
-        /* overflow: hidden;
-        text-overflow: ellipsis;
-        word-wrap: break-word; 
-        display: inline;        */
-        /* display: inline;                 */
-        /* box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        -webkit-box-sizing: border-box; */
+        padding: 15px;        
     }
     td.center, th.center {
         text-align: center;

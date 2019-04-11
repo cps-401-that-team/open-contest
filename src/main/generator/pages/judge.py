@@ -120,19 +120,19 @@ class SubmissionCard(UIElement):
                 h.strong("Language: <span class='language-format'>{}</span>".format(submission.language)),
                 h.br(),
                 h.strong("Result: ",
-                    h.select(cls=f"result-choice {submission.id}", onchange=f"changeSubmissionResult('{submission.id}')", contents=[
+                    h.select(cls=f"result-choice {submission.id}", onchange=f"changeSubmissionResult('{submission.id}', '{version}')", contents=[
                         *resultOptions(submission.result)
                     ])
                 ),
                 h.strong(" Submission status: ",
-                    h.select(cls=f"submission-status {submission.id}", onchange=f"changeSubmissionStatus('{submission.id}')", contents=[
+                    h.select(cls=f"submission-status {submission.id}", onchange=f"changeSubmissionStatus('{submission.id}', '{version}')", contents=[
                         *statusOptions(submission.result)
                     ])
                 ),
                 h.strong(" Checkout: {}".format(user.username)),
                 h.br(),
                 h.br(),
-                h.button("Rejudge", type="button", onclick=f"rejudge('{submission.id}')", cls="btn btn-primary rejudge"),
+                h.button("Rejudge", type="button", onclick=f"rejudge('{submission.id, version}')", cls="btn btn-primary rejudge"),
                 h.br(),
                 h.br(),
                 h.strong("Code:"),
@@ -154,13 +154,26 @@ class SubmissionCardPopup(UIElement):
         cls = "red" if submission.result != "ok" else ""
         self.html = div(cls="modal-content", contents=[            
             div(cls="modal-body", contents=[
-                h.strong("Warning: {} is has currently checked out this submission".format(User.get(submission.checkout))),
+                h.strong(f"Warning: {User.get(submission.checkout).username} has currently checked out this submission"),
                 h.br(),
-                h.strong("Do you want to override?",
+                h.strong("Do you want to override? ",
                     h.select(cls="change-checkout", onchange=f"checkout('{user.id}', '{submission.id}')", contents=[
                         *overrideOptions()
                     ])
                 ),                
+            ])
+        ])
+
+class VersionChangePopup(UIElement):
+    def __init__(self, submission: Submission, user: User):
+        subTime = submission.timestamp
+        probName = submission.problem.title        
+        cls = "red" if submission.result != "ok" else ""
+        self.html = div(cls="modal-content", contents=[            
+            div(cls="modal-body", contents=[
+                h.strong(f"Submission changed by another judge since you started editing."),
+                h.br(),
+                h.strong("Please reload page, or select another submission."),                
             ])
         ])
 
@@ -180,15 +193,13 @@ class SubmissionRow(UIElement):
             h.td(
                 h.i("&nbsp;", cls=f"fa fa-{icons[sub.result]}"),
                 h.span(verdict_name[sub.result])
-            ),
-            h.td(sub.status),  
-            h.td(User.get(sub.checkout)),          
+            ),                                   
             onclick=f"submissionPopup('{sub.id}')"
         )
 
 class SubmissionTable(UIElement):
     def __init__(self, contest):
-        subs = filter(lambda sub: sub.user.type != "admin" and contest.start <= sub.timestamp <= contest.end, Submission.all())
+        subs = filter(lambda sub: sub.status == "review" and sub.user.type != "admin" and contest.start <= sub.timestamp <= contest.end, Submission.all())
         self.html = h.table(
             h.thead(
                 h.tr(
@@ -196,9 +207,7 @@ class SubmissionTable(UIElement):
                     h.th("Problem"),
                     h.th("Time"),
                     h.th("Language"),
-                    h.th("Result"),
-                    h.th("Submission Status"),
-                    h.th("Checkout")
+                    h.th("Result")                                        
                 )
             ),
             h.tbody(
@@ -236,6 +245,10 @@ def judge_submission(params, user):
 def judge_override(params, user):    
     return SubmissionCard(Submission.get(params[0]),user)    
 
+def version_change(params, user):    
+    return VersionChangePopup(Submission.get(params[0]),user)
+
 register.web("/judgeSubmission/([a-zA-Z0-9-]*)", "admin", judge_submission)
 register.web("/judgeOverride/([a-zA-Z0-9-]*)", "admin", judge_override)
+register.web("/versionChange/([a-zA-Z0-9-]*)", "admin", version_change)
 register.web("/judge", "admin", judge)

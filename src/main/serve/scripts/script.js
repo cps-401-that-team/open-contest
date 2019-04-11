@@ -667,11 +667,13 @@ Messages Page
 /*--------------------------------------------------------------------------------------------------
 Judging Page
 --------------------------------------------------------------------------------------------------*/
-    function changeSubmissionResult(id) {
+    function changeSubmissionResult(id, version) {
         var result = $(`.result-choice.${id}`).val();
-        $.post("/changeResult", {id: id, result: result}, result => {
+        $.post("/changeResult", {id: id, version:version, result: result}, result => {
             if (result == "ok") {
                 window.location.reload();                
+            } else if(result == "vErr"){
+                changePopup(id);
             } else {
                 alert(result);
             }
@@ -689,11 +691,13 @@ Judging Page
             }      
         })
     }
-    function changeSubmissionStatus(id) {
+    function changeSubmissionStatus(id, version) {
         var result = $(`.submission-status.${id}`).val();
-        $.post("/changeStatus", {id: id, result: result}, result => {            
+        $.post("/changeStatus", {id: id, version:version, result: result}, result => {            
             if (result == "ok") {
                 window.location.reload();
+            } else if(result == "vErr"){
+                changePopup(id);
             } else {
                 alert(result);
             }          
@@ -701,6 +705,14 @@ Judging Page
     }
     function overridePopup(id) {
         $.post(`/judgeOverride/${id}`, {}, data => {
+            $(".modal-dialog").html(data);
+            $(".result-tabs").tabs();
+            fixFormatting();
+            $(".modal").modal();
+        });
+    }
+    function changePopup(id) {
+        $.post(`/versionChange/${id}`, {}, data => {
             $(".modal-dialog").html(data);
             $(".result-tabs").tabs();
             fixFormatting();
@@ -716,7 +728,7 @@ Judging Page
         });
     }
 
-    function rejudge(id) {
+    function rejudge(id, version) {
         $(".rejudge").attr("disabled", true);
         $(".rejudge").addClass("button-gray");
 
