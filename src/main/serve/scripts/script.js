@@ -706,8 +706,6 @@ Judging Page
         
         var zip = new JSZip();
 
-        // Add an top-level, arbitrary text file with contents
-        
         $.post(`/downloadsubmission/${id}`, {}, data => {
             $.each(JSON.parse(data), function(filename, content) { 
                 zip.file(filename,content);
@@ -715,7 +713,6 @@ Judging Page
 
             zip.generateAsync({type:"blob"})
             .then(function(content) {
-                // Force down of the Zip file
                 saveAs(content, `submission_${id}.zip`);
             });
         });
