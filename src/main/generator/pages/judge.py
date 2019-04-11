@@ -2,7 +2,7 @@ from code.util import register
 from code.util.db import Contest, Problem, Submission
 from code.generator.lib.htmllib import *
 from code.generator.lib.page import *
-
+import json
 import logging
 from datetime import datetime
 
@@ -99,7 +99,11 @@ class SubmissionCard(UIElement):
                 ),
                 h.br(),
                 h.br(),
-                h.button("Rejudge", type="button", onclick=f"rejudge('{submission.id}')", cls="btn btn-primary rejudge"),
+                div(cls="align-left", contents=[
+                    h.button("Rejudge", type="button", onclick=f"rejudge('{submission.id}')", cls="btn btn-primary rejudge"),
+                    "&nbsp;",
+                    h.button("Download Submission", type="button", onclick=f"download('{submission.id}')", cls="btn btn-primary download")
+                ]),
                 h.br(),
                 h.br(),
                 h.strong("Code:"),
@@ -173,5 +177,28 @@ def judge(params, user):
 def judge_submission(params, user):
     return SubmissionCard(Submission.get(params[0]))
 
+def downloadsubmission(params, user):
+    sub = Submission.get(params[0]).__dict__
+    output = {}
+    output["code"] = sub["code"]
+    
+    index = 0
+    for i in sub["inputs"]:
+        index += 1
+        output["input" + str(index)] = i
+   
+    index = 0
+    for i in sub["outputs"]:
+        index += 1
+        output["output" + str(index)] = i
+
+    return json.dumps(output)
+
+
+    
+    
+
+
 register.web("/judgeSubmission/([a-zA-Z0-9-]*)", "admin", judge_submission)
+register.web("/downloadsubmission/([a-zA-Z0-9-]*)", "admin", downloadsubmission)
 register.web("/judge", "admin", judge)
