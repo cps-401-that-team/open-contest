@@ -84,6 +84,9 @@ def runCode(sub):
             res = "tle"
         results.append(res)
 
+        print(answers[-1])
+        print(outputs[-1])
+
         # Make result the first incorrect result
         if res != "ok" and result == "ok":
             result = res
