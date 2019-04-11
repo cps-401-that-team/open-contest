@@ -703,9 +703,8 @@ Judging Page
     }
 
     function download(id) {
-        
         var zip = new JSZip();
-
+        
         $.post(`/downloadsubmission/${id}`, {}, data => {
             $.each(JSON.parse(data), function(filename, content) { 
                 zip.file(filename,content);
@@ -716,6 +715,4 @@ Judging Page
                 saveAs(content, `submission_${id}.zip`);
             });
         });
-        
-        
     }
