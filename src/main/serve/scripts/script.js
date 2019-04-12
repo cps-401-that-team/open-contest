@@ -688,6 +688,16 @@ Judging Page
         });
     }
 
+    function rejudgeAll(id)
+    {
+        $(`#rejudgebutton${id}`).attr("disabled", true);
+        $.post("/rejudgeAll", {id:id}, data =>{
+            $(`#rejudgebutton${id}`).attr("disabled", false);
+            alert("DONE");
+        });
+
+    }
+
     function rejudge(id) {
         $(".rejudge").attr("disabled", true);
         $(".rejudge").addClass("button-gray");
