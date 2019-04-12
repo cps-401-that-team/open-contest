@@ -92,8 +92,8 @@ def listProblems(params, user):
                         </button>""".replace('?', probid.split('/')[-1])
             
             probCards.append(Card(
-                prob.title,
-                prob.description + button if user.isAdmin() else "",
+                prob.title+ button if user.isAdmin() else "",
+                prob.description,
                 probid
             ))
         return Page(
