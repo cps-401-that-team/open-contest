@@ -140,7 +140,8 @@ def rejudgeAll(params, setHeader, user):
     id = params["id"]
     allsub = Submission.all()
     for i in allsub:
-        if i.problem.id == id and i.timestamp < ctime:
+        print(i.result)
+        if i.problem.id == id and i.timestamp < ctime and i.result != 'reject':
             rejudge({'id':i.id}, None, None)
     return "Finished"
 
