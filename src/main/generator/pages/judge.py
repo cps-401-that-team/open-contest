@@ -78,12 +78,10 @@ class TestCaseData(UIElement):
 class SubmissionCard(UIElement):
     def __init__(self, submission: Submission):
         subTime = submission.timestamp
-        probName = submission.problem.title
-        print(len(submission.outputs[0]))
+        probName = submission.problem.title        
         if(len(submission.outputs[0]) > MAX_OUTPUT_DISPLAY_LENGTH):
             submission.outputs[0] = submission.outputs[0][:MAX_OUTPUT_DISPLAY_LENGTH] + " ...additional data not displayed..."
-
-        print(len(submission.outputs[0]))
+        
         cls = "red" if submission.result != "ok" else ""
         self.html = div(cls="modal-content", contents=[
             div(cls=f"modal-header {cls}", contents=[
