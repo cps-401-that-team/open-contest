@@ -25,7 +25,9 @@ class Submission:
             self.errors      = details["errors"]
             self.answers     = details["answers"]
             self.result      = details["result"]
-            self.submissionStatus = details["submissionStatus"]
+            self.status      = details["status"]
+            self.checkout    = details["checkout"]
+            self.version     = details["version"]
         else:
             self.id          = None
             self.user        = None
@@ -40,7 +42,9 @@ class Submission:
             self.errors      = []
             self.answers     = []
             self.result      = []
-            self.submissionStatus = []
+            self.status      = "review"
+            self.checkout    = None
+            self.version     = 0
 
     def get(id: str):
         with lock.gen_rlock():
@@ -63,7 +67,9 @@ class Submission:
             "errors":    self.errors,
             "answers":   self.answers,
             "result":    self.result,
-            "submissionStatus": self.submissionStatus
+            "status":    self.status,
+            "checkout":  self.checkout,
+            "version":   self.version
         }
 
     def save(self):
@@ -110,7 +116,9 @@ class Submission:
                 "errors":    self.errors[:self.problem.samples],
                 "answers":   self.answers[:self.problem.samples],
                 "result":    self.result,
-                "submissionStatus": self.submissionStatus
+                "status":    self.status,
+                "checkout":  self.checkout,
+                "version":   self.version
             }
 
     def forEach(callback: callable):

@@ -668,17 +668,58 @@ Messages Page
 /*--------------------------------------------------------------------------------------------------
 Judging Page
 --------------------------------------------------------------------------------------------------*/
-    function changeSubmissionResult(id) {
+    function changeSubmissionResult(id, version) {
         var result = $(`.result-choice.${id}`).val();
-        $.post("/changeResult", {id: id, result: result}, result => {
+        $.post("/changeResult", {id: id, version:version, result: result}, result => {
             if (result == "ok") {
-                window.location.reload();
+                window.location.reload();                
+            } else if(result == "vErr"){
+                changePopup(id);
             } else {
                 alert(result);
             }
         })
     }
-
+    function checkout(user_id,subm_id){
+        var result = $(`.change-checkout`).val();
+        $.post("/changeCheckout", {user_id: user_id, subm_id:subm_id, result: result}, result => {            
+            if (result == "ok") {                
+                overridePopup(subm_id);
+            } else if(result == "noChange") {
+                window.location.reload();
+            } else{
+                alert(result);
+            }      
+        })
+    }
+    function changeSubmissionStatus(id, version) {
+        var result = $(`.submission-status.${id}`).val();
+        $.post("/changeStatus", {id: id, version:version, result: result}, result => {            
+            if (result == "ok") {
+                window.location.reload();
+            } else if(result == "vErr"){
+                changePopup(id);
+            } else {
+                alert(result);
+            }          
+        })
+    }
+    function overridePopup(id) {
+        $.post(`/judgeOverride/${id}`, {}, data => {
+            $(".modal-dialog").html(data);
+            $(".result-tabs").tabs();
+            fixFormatting();
+            $(".modal").modal();
+        });
+    }
+    function changePopup(id) {
+        $.post(`/versionChange/${id}`, {}, data => {
+            $(".modal-dialog").html(data);
+            $(".result-tabs").tabs();
+            fixFormatting();
+            $(".modal").modal();
+        });
+    }
     function submissionPopup(id) {
         $.post(`/judgeSubmission/${id}`, {}, data => {
             $(".modal-dialog").html(data);
@@ -688,7 +729,7 @@ Judging Page
         });
     }
 
-    function rejudge(id) {
+    function rejudge(id, version) {
         $(".rejudge").attr("disabled", true);
         $(".rejudge").addClass("button-gray");
 
