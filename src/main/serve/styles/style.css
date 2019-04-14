@@ -471,21 +471,21 @@ Leaderboard Page
     table {
         box-shadow: 0 2px 10px 0 rgba(0,0,0,.2);
         width: 100%;
-        background-color: white;         
+        background-color: white;
     }
     thead {
         border-bottom: 2px solid #b4e0c0;
         background-color: #dcf0e2;
-        color: #093;                
+        color: #093;
     }
     tr {
-        border-bottom: 1px solid #ccc;        
+        border-bottom: 1px solid #ccc;
     }
     tr:nth-child(2n) {
         background-color: #f4f4f4;
     }
     td, th {
-        padding: 15px;        
+        padding: 15px;
     }
     td.center, th.center {
         text-align: center;
@@ -560,7 +560,7 @@ Judging Page
     #judge-tabs h4 {
         font-size: 1.2em;
         font-weight: bold;
-        margin-top: 5px;        
+        margin-top: 5px;
     }
     .modal-dialog {
         max-width: 70vw;
@@ -579,8 +579,8 @@ Judging Page
         border-color: #093;
     }
     table#submissions tbody tr {
-        float: left;                        
+        cursor: pointer;
     }
     table#submissions tbody tr:hover {
-        background: #ddd;                
+        background: #ddd;
     }

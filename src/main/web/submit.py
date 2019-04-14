@@ -16,7 +16,6 @@ def addSubmission(probId, lang, code, user, type):
     sub.user = user
     sub.timestamp = time.time() * 1000
     sub.type = type
-    sub.status = "review"
     if type == "submit":
         sub.save()
     else:
@@ -62,7 +61,7 @@ def runCode(sub):
     os.mkdir(f"/tmp/{sub.id}/out")
 
     # Run the runner
-    if os.system(f"docker run --rm --network=none -m 256MB -v /tmp/{sub.id}/:/source nathantheinventor/open-contest-dev-{sub.language}-runner {tests} 5 > /tmp/{sub.id}/result.txt") != 0:
+    if os.system(f"docker run --rm --network=none -m 256MB -v /tmp/{sub.id}/:/source nathantheinventor/open-contest-dev-{sub.language}-runner {tests} {prob.probTime} > /tmp/{sub.id}/result.txt") != 0:
         raise Exception("Something went wrong")
 
     inputs = []
@@ -89,11 +88,7 @@ def runCode(sub):
         if res != "ok" and result == "ok":
             result = res
 
-    sub.result = result    
-    if(sub.result == "tle" or sub.result == "runtime_error" or sub.result == "ok"):
-        sub.status = "judged"
-    if(sub.result == "wrong_answer" or sub.result == "extra_output"):
-        sub.result == "pending"
+    sub.result = result
     if readFile(f"/tmp/{sub.id}/result.txt") == "compile_error\n":
         sub.results = "compile_error"
         sub.delete()
@@ -123,47 +118,12 @@ def submit(params, setHeader, user):
 
 def changeResult(params, setHeader, user):
     id = params["id"]
-    vers = params["version"]
-    sub = Submission.get(id)    
-    if(sub.version != int(vers)):
-        return "vErr"    
+    sub = Submission.get(id)
     if not sub:
         return "Error: incorrect id"
     sub.result = params["result"]
-    sub.checkout = None
-    sub.version += 1
     sub.save()
     return "ok"
-
-def checkout(params, setHeader, user):
-    user_id = params["user_id"]
-    subm_id = params["subm_id"]
-    sub = Submission.get(subm_id)
-    if not sub:
-        return "Error: incorrect id"
-    if(params["result"] == "yes"):
-        sub.checkout = user_id
-        sub.save()
-        return "ok"
-    elif(params["result"] == "no"):
-        return "noChange"
-    else:
-        return "noneSelected"
-
-def changeStatus(params, setHeader, user):
-    id = params["id"]
-    vers = params["version"]
-    sub = Submission.get(id)    
-    if(sub.version != int(vers)):
-        return "vErr"
-    if not sub:
-        return "Error: incorrect id"
-    sub.status = params["result"]
-    sub.checkout = None
-    sub.version += 1
-    sub.save()
-    return "ok"
-
 
 def rejudge(params, setHeader, user):
     id = params["id"]
@@ -175,6 +135,4 @@ def rejudge(params, setHeader, user):
 
 register.post("/submit", "loggedin", submit)
 register.post("/changeResult", "admin", changeResult)
-register.post("/changeStatus", "admin", changeStatus)
-register.post("/changeCheckout", "admin", checkout)
 register.post("/rejudge", "admin", rejudge)

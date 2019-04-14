@@ -415,11 +415,19 @@ Contest page
         var endDate = $("#contest-end-date").val();
         var endTime = $("#contest-end-time").val();
         var scoreboardOffTime = $("#scoreboard-off-time").val();
-        var showProblInfoBlocks = $("#show-problem-info-blocks").val();
 
-        var start = new Date(`${startDate} ${startTime}`).getTime();
-        var end = new Date(`${endDate} ${endTime}`).getTime();
-        var endScoreboard = new Date(`${endDate} ${scoreboardOffTime}`).getTime();
+
+        // Invalid DATE format; "T" after the date and "Z" after the time have been inserted 
+        // for the correct format for creating the Dates, then the milliseconds are adjusted 
+        // for the correct time zone for each of the following variables, since "Z" assumes you
+        // are entering a UTC time.
+
+        var start = new Date(`${startDate}T${startTime}Z`);
+        start = start.getTime() + (start.getTimezoneOffset() * 60000);
+        var end = new Date(`${endDate}T${endTime}Z`);
+        end = end.getTime() + (end.getTimezoneOffset() * 60000);
+        var endScoreboard = new Date(`${endDate}T${scoreboardOffTime}Z`);
+        endScoreboard = endScoreboard.getTime() + (endScoreboard.getTimezoneOffset() * 60000);
 
         if (end <= start) {
             alert("The end of the contest must be after the start.");
@@ -447,7 +455,7 @@ Contest page
             problems.push(newProblem);
         }
 
-        $.post("/editContest", {id: id, name: name, start: start, end: end, scoreboardOff: endScoreboard,showProblInfoBlocks: showProblInfoBlocks, problems: JSON.stringify(problems)}, id => {
+        $.post("/editContest", {id: id, name: name, start: start, end: end, scoreboardOff: endScoreboard, problems: JSON.stringify(problems)}, id => {
             if (window.location.pathname == "/contests/new") {
                 window.location = `/contests/${id}`;
             } else {
@@ -546,6 +554,7 @@ Problem page
         problem.output      = mdEditors[2].value();
         problem.constraints = mdEditors[3].value();
         problem.samples     = $("#problem-samples").val();
+        problem.probTime    = $("#problem-timelimit").val();
         testData = [];
         $(".test-data-cards .card").each((_, card) => {
             var input = $(card).find("code:eq(0)").html().replace(/<br>/g, "\n").replace(/<br\/>/g, "\n").replace(/&nbsp;/g, " ");
@@ -668,58 +677,17 @@ Messages Page
 /*--------------------------------------------------------------------------------------------------
 Judging Page
 --------------------------------------------------------------------------------------------------*/
-    function changeSubmissionResult(id, version) {
+    function changeSubmissionResult(id) {
         var result = $(`.result-choice.${id}`).val();
-        $.post("/changeResult", {id: id, version:version, result: result}, result => {
+        $.post("/changeResult", {id: id, result: result}, result => {
             if (result == "ok") {
-                window.location.reload();                
-            } else if(result == "vErr"){
-                changePopup(id);
+                window.location.reload();
             } else {
                 alert(result);
             }
         })
     }
-    function checkout(user_id,subm_id){
-        var result = $(`.change-checkout`).val();
-        $.post("/changeCheckout", {user_id: user_id, subm_id:subm_id, result: result}, result => {            
-            if (result == "ok") {                
-                overridePopup(subm_id);
-            } else if(result == "noChange") {
-                window.location.reload();
-            } else{
-                alert(result);
-            }      
-        })
-    }
-    function changeSubmissionStatus(id, version) {
-        var result = $(`.submission-status.${id}`).val();
-        $.post("/changeStatus", {id: id, version:version, result: result}, result => {            
-            if (result == "ok") {
-                window.location.reload();
-            } else if(result == "vErr"){
-                changePopup(id);
-            } else {
-                alert(result);
-            }          
-        })
-    }
-    function overridePopup(id) {
-        $.post(`/judgeOverride/${id}`, {}, data => {
-            $(".modal-dialog").html(data);
-            $(".result-tabs").tabs();
-            fixFormatting();
-            $(".modal").modal();
-        });
-    }
-    function changePopup(id) {
-        $.post(`/versionChange/${id}`, {}, data => {
-            $(".modal-dialog").html(data);
-            $(".result-tabs").tabs();
-            fixFormatting();
-            $(".modal").modal();
-        });
-    }
+
     function submissionPopup(id) {
         $.post(`/judgeSubmission/${id}`, {}, data => {
             $(".modal-dialog").html(data);
@@ -729,7 +697,7 @@ Judging Page
         });
     }
 
-    function rejudge(id, version) {
+    function rejudge(id) {
         $(".rejudge").attr("disabled", true);
         $(".rejudge").addClass("button-gray");
 

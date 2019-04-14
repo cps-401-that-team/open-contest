@@ -40,109 +40,68 @@ class TestDataCard(UIElement):
 def editProblem(params, user):
     probId = params[0]
     prob = Problem.get(probId)
-    contest = Contest.getCurrent()
-    if(contest.showProblInfoBlocks == "Off"):
-        return Page(
-            h.input(type="hidden", id="prob-id", value=probId),
-            h.input(type="hidden", id="pageId", value="Problem"),
-            h2(prob.title, cls="page-title"),
-            div(cls="actions", contents=[
-                h.button("View Problem", cls="button", onclick=f"window.location='/problems/{probId}'"),
-                h.button("+ Create Test Data", cls="button", onclick="createTestDataDialog()")
-            ]),
-            Card("Problem Details", div(cls="problem-details", contents=[
-                h.form(cls="row", contents=[
-                    div(cls="form-group col-12", contents=[
-                        h.label(**{"for": "problem-title", "contents":"Title"}),
-                        h.input(cls="form-control", name="problem-title", id="problem-title", value=prob.title)
-                    ]),
-                    div(cls="form-group col-12", contents=[
-                        h.label(**{"for": "problem-description", "contents":"Description"}),
-                        h.textarea(cls="form-control", name="problem-description", id="problem-description", contents=escape(prob.description))
-                    ]),                    
-                    div(cls="form-group col-12", contents=[
-                        h.label(**{"for": "problem-samples", "contents":"Number of Sample Cases"}),
-                        h.input(cls="form-control", type="number", name="problem-samples", id="problem-samples", value=prob.samples)
-                    ]),
+    return Page(
+        h.input(type="hidden", id="prob-id", value=probId),
+        h.input(type="hidden", id="pageId", value="Problem"),
+        h2(prob.title, cls="page-title"),
+        div(cls="actions", contents=[
+            h.button("View Problem", cls="button", onclick=f"window.location='/problems/{probId}'"),
+            h.button("+ Create Test Data", cls="button", onclick="createTestDataDialog()")
+        ]),
+        Card("Problem Details", div(cls="problem-details", contents=[
+            h.form(cls="row", contents=[
+                div(cls="form-group col-12", contents=[
+                    h.label(**{"for": "problem-title", "contents":"Title"}),
+                    h.input(cls="form-control", name="problem-title", id="problem-title", value=prob.title)
                 ]),
-                div(cls="align-right col-12", contents=[
-                    h.button("Save", cls="button", onclick="editProblem()")
-                ])
-            ])),
-            Modal(
-                "Create Test Data",
-                div(
-                    h.h5("Input"),
-                    h.textarea(rows="5", cls="test-data-input col-12 monospace margin-bottom"),
-                    h.h5("Output"),
-                    h.textarea(rows="5", cls="test-data-output col-12 monospace")
-                ),
-                div(
-                    h.button("Cancel", **{"type":"button", "class": "button button-white", "data-dismiss": "modal"}),
-                    h.button("Add Test Data", **{"type":"button", "class": "button", "onclick": "createTestData()"})
-                )
-            ),
-            div(cls="test-data-cards", contents=list(map(TestDataCard, zip(range(prob.tests), prob.testData, [prob.samples] * prob.tests))))
-        )
-    else: 
-        return Page(
-            h.input(type="hidden", id="prob-id", value=probId),
-            h.input(type="hidden", id="pageId", value="Problem"),
-            h2(prob.title, cls="page-title"),
-            div(cls="actions", contents=[
-                h.button("View Problem", cls="button", onclick=f"window.location='/problems/{probId}'"),
-                h.button("+ Create Test Data", cls="button", onclick="createTestDataDialog()")
-            ]),
-            Card("Problem Details", div(cls="problem-details", contents=[
-                h.form(cls="row", contents=[
-                    div(cls="form-group col-12", contents=[
-                        h.label(**{"for": "problem-title", "contents":"Title"}),
-                        h.input(cls="form-control", name="problem-title", id="problem-title", value=prob.title)
-                    ]),
-                    div(cls="form-group col-12", contents=[
-                        h.label(**{"for": "problem-description", "contents":"Description"}),
-                        h.textarea(cls="form-control", name="problem-description", id="problem-description", contents=escape(prob.description))
-                    ]),
-                    div(cls="form-group col-12 rich-text", contents=[
-                        h.label(**{"for": "problem-statement", "contents":"Problem Statement"}),
-                        h.textarea(cls="form-control", name="problem-statement", id="problem-statement", contents=escape(prob.statement))
-                    ]),
-                    div(cls="form-group col-12 rich-text", contents=[
-                        h.label(**{"for": "problem-input", "contents":"Input Format"}),
-                        h.textarea(cls="form-control", name="problem-input", id="problem-input", contents=escape(prob.input))
-                    ]),
-                    div(cls="form-group col-12 rich-text", contents=[
-                        h.label(**{"for": "problem-output", "contents":"Output Format"}),
-                        h.textarea(cls="form-control", name="problem-output", id="problem-output", contents=escape(prob.output))
-                    ]),
-                    div(cls="form-group col-12 rich-text", contents=[
-                        h.label(**{"for": "problem-constraints", "contents":"Constraints"}),
-                        h.textarea(cls="form-control", name="problem-constraints", id="problem-constraints", contents=escape(prob.constraints))
-                    ]),
-                    div(cls="form-group col-12", contents=[
-                        h.label(**{"for": "problem-samples", "contents":"Number of Sample Cases"}),
-                        h.input(cls="form-control", type="number", name="problem-samples", id="problem-samples", value=prob.samples)
-                    ]),
+                div(cls="form-group col-12", contents=[
+                    h.label(**{"for": "problem-description", "contents":"Description"}),
+                    h.textarea(cls="form-control", name="problem-description", id="problem-description", contents=escape(prob.description))
                 ]),
-                div(cls="align-right col-12", contents=[
-                    h.button("Save", cls="button", onclick="editProblem()")
-                ])
-            ])),
-            Modal(
-                "Create Test Data",
-                div(
-                    h.h5("Input"),
-                    h.textarea(rows="5", cls="test-data-input col-12 monospace margin-bottom"),
-                    h.h5("Output"),
-                    h.textarea(rows="5", cls="test-data-output col-12 monospace")
-                ),
-                div(
-                    h.button("Cancel", **{"type":"button", "class": "button button-white", "data-dismiss": "modal"}),
-                    h.button("Add Test Data", **{"type":"button", "class": "button", "onclick": "createTestData()"})
-                )
+                div(cls="form-group col-12 rich-text", contents=[
+                    h.label(**{"for": "problem-statement", "contents":"Problem Statement"}),
+                    h.textarea(cls="form-control", name="problem-statement", id="problem-statement", contents=escape(prob.statement))
+                ]),
+                div(cls="form-group col-12 rich-text", contents=[
+                    h.label(**{"for": "problem-input", "contents":"Input Format"}),
+                    h.textarea(cls="form-control", name="problem-input", id="problem-input", contents=escape(prob.input))
+                ]),
+                div(cls="form-group col-12 rich-text", contents=[
+                    h.label(**{"for": "problem-output", "contents":"Output Format"}),
+                    h.textarea(cls="form-control", name="problem-output", id="problem-output", contents=escape(prob.output))
+                ]),
+                div(cls="form-group col-12 rich-text", contents=[
+                    h.label(**{"for": "problem-constraints", "contents":"Constraints"}),
+                    h.textarea(cls="form-control", name="problem-constraints", id="problem-constraints", contents=escape(prob.constraints))
+                ]),
+                div(cls="form-group col-12", contents=[
+                    h.label(**{"for": "problem-samples", "contents":"Number of Sample Cases"}),
+                    h.input(cls="form-control", type="number", name="problem-samples", id="problem-samples", value=prob.samples)
+                ]),
+                div(cls="form-group col-12", contents=[
+                    h.label(**{"for": "problem-timelimit", "contents":"Max time"}),
+                    h.input(cls="form-control", type="number", name="problem-timelimit", id="problem-timelimit", value=prob.probTime)
+                ]),
+            ]),
+            div(cls="align-right col-12", contents=[
+                h.button("Save", cls="button", onclick="editProblem()")
+            ])
+          ])),
+        Modal(
+            "Create Test Data",
+            div(
+                h.h5("Input"),
+                h.textarea(rows="5", cls="test-data-input col-12 monospace margin-bottom"),
+                h.h5("Output"),
+                h.textarea(rows="5", cls="test-data-output col-12 monospace")
             ),
-            div(cls="test-data-cards", contents=list(map(TestDataCard, zip(range(prob.tests), prob.testData, [prob.samples] * prob.tests))))
-        )
+            div(
+                h.button("Cancel", **{"type":"button", "class": "button button-white", "data-dismiss": "modal"}),
+                h.button("Add Test Data", **{"type":"button", "class": "button", "onclick": "createTestData()"})
+            )
+        ),
+        div(cls="test-data-cards", contents=list(map(TestDataCard, zip(range(prob.tests), prob.testData, [prob.samples] * prob.tests))))
+    )
 
 def newProblem(params, user):
     return Page(
@@ -177,6 +136,9 @@ def newProblem(params, user):
                 ]),
                 div(cls="form-group col-12", contents=[
                     h.input(cls="form-control", type="hidden", name="problem-samples", id="problem-samples", value=0)
+                ]),
+                div(cls="form-group col-12", contents=[
+                    h.input(cls="form-control", type="hidden", name="problem-timelimit", id="problem-timelimit", value=5)
                 ]),
             ]),
             div(cls="align-right col-12", contents=[
