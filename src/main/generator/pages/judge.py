@@ -80,12 +80,12 @@ def markDiffLines(list1,list2):
                 if True or match.a < len(big[i]):
 
                     #mark sections that differ from the other string
-                    tempbig += ((spanred+ big[i][bl:match.a]+ end) if len(big[i][bl:match.a]) > 0 else "") + big[i][match.a:match.a+match.size]
+                    tempbig += (((spanred if big==list1 else spangreen) + big[i][bl:match.a]+ end) if len(big[i][bl:match.a]) > 0 else "") + big[i][match.a:match.a+match.size]
                  
                     bl = match.a+match.size
                     
                                                     
-                    tempsmall += (( spanred+ small[i][sl:match.b]+ end) if len(small[i][sl:match.b]) > 0 else "") + small[i][match.b:match.b+match.size]
+                    tempsmall += (( (spanred if small==list1 else spangreen)+ small[i][sl:match.b]+ end) if len(small[i][sl:match.b]) > 0 else "") + small[i][match.b:match.b+match.size]
                     sl = match.b+match.size
                 
 
@@ -93,7 +93,7 @@ def markDiffLines(list1,list2):
             small[i] = tempsmall
 
         else:
-            big[i] = spangreen+big[i].replace("\n", "</span>\n")
+            big[i] = (spanred if big==list1 else spangreen)+big[i].replace("\n", "</span>\n")
             if big[i][-1] != '\n':
                 big[i] = big[i]+'</span>\n'
 
