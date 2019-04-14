@@ -72,15 +72,38 @@ def runCode(sub):
     results = []
     result = "ok"
 
+
     for i in range(tests):
         inputs.append(sub.problem.testData[i].input)
         errors.append(readFile(f"/tmp/{sub.id}/out/err{i}.txt"))
         outputs.append(readFile(f"/tmp/{sub.id}/out/out{i}.txt"))
         answers.append(sub.problem.testData[i].output)
-        
+
+        anstrip = strip((answers[-1] or "").rstrip()).splitlines()
+        outstrip = strip((outputs[-1] or "").rstrip()).splitlines()
+
         res = readFile(f"/tmp/{sub.id}/out/result{i}.txt")
-        if res == "ok" and strip((answers[-1] or "").rstrip()) != strip((outputs[-1] or "").rstrip()):
-            res = "wrong_answer"
+        if res == "ok" and anstrip != outstrip:
+            extra = False
+            if len(anstrip) < len(outstrip):
+                extra = True
+            incomplete = False
+            
+            for i in range(len(outstrip)):
+                if i < len(anstrip):
+                    if anstrip[i] == outstrip[i]:
+                        incomplete = True
+                    else:
+                        extra = False
+            if len(anstrip) < len(outstrip):
+                incomplete = False
+
+            if not extra and not incomplete:
+                res = "wrong_answer"
+            elif extra:
+                res = "extra_output"
+            else:
+                res = "incomplete_output"
         if res == None:
             res = "tle"
         results.append(res)

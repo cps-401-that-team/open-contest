@@ -86,6 +86,8 @@ register.web("/faqs", "any", lambda params, user: Page(
             <ul><li><i>Accepted</i>: Your code produced the correct output for all test cases.</li>
                 <li><i>Wrong Answer</i>: Your code produced incorrect output for some test case.</li>
                 <li><i>Runtime Error</i>: Your code threw an exception and exited with a non-zero exit code.</li>
+                <li><i>Extra output</i>: Your code produced the correct output for all test cases, but it produced more lines than requested.</li>
+                <li><i>incomplete output</i>: Your code produced corrrect output for one or more tests but not for all test.</li>
                 <li><i>Time Limit Exceeded</i>: Your code ran longer than the time allowed.</li></ul>
             """),
         FAQ("How does scoring work?", """Your score is determined by two factors: the number of problems 
