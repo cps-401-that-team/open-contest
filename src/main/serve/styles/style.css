@@ -579,7 +579,7 @@ Judging Page
         border-color: #093;
     }
     table#submissions tbody tr {
-        float: left;                        
+        cursor: pointer;                       
     }
     table#submissions tbody tr:hover {
         background: #ddd;                
