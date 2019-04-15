@@ -696,6 +696,14 @@ Judging Page
             }      
         })
     }
+    // /resetCheckout
+    function resetCheckout(id){
+        $.post("/resetCheckout", {id:id}, result => {            
+            if (result != "ok") {                
+                alert(result);
+            }    
+        })
+    }
     function changeSubmissionStatus(id, version) {
         var result = $(`.submission-status.${id}`).val();
         $.post("/changeStatus", {id: id, version:version, result: result}, result => {            
