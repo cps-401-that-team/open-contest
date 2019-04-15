@@ -746,10 +746,29 @@ Judging Page
     function rejudge(id) {
         $(".rejudge").attr("disabled", true);
         $(".rejudge").addClass("button-gray");
-
+        $(".download").attr("disabled", true);
+        $(".download").addClass("button-gray");
+        console.log("HI go away")
         $.post("/rejudge", {id: id}, data => {
             $(".rejudge").attr("disabled", false);
             $(".rejudge").removeClass("button-gray");
+            $(".download").attr("disabled", false);
+            $(".download").removeClass("button-gray");
             alert(`New Result: ${verdict_name[data]}`);
+        });
+    }
+
+    function download(id) {
+        var zip = new JSZip();
+        
+        $.post(`/downloadsubmission/${id}`, {}, data => {
+            $.each(JSON.parse(data), function(filename, content) { 
+                zip.file(filename,content);
+            });
+
+            zip.generateAsync({type:"blob"})
+            .then(function(content) {
+                saveAs(content, `submission_${id}.zip`);
+            });
         });
     }
