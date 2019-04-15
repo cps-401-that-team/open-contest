@@ -182,8 +182,8 @@ class SubmissionCard(UIElement):
                     f"Submission to {probName} at ",
                     h.span(subTime, cls="time-format")
                 ),
-                """
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                f"""
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="javascript: void resetCheckout('{submission.id}');">
                     <span aria-hidden="true">&times;</span>
                 </button>"""
             ]),
@@ -268,7 +268,7 @@ class SubmissionRow(UIElement):
             h.td(
                 h.i("&nbsp;", cls=f"fa fa-{icons[sub.result]}"),
                 h.span(verdict_name[sub.result])
-            ),                                   
+            ),                                                         
             onclick=f"submissionPopup('{sub.id}')"
         )
 
@@ -282,7 +282,7 @@ class SubmissionTable(UIElement):
                     h.th("Problem"),
                     h.th("Time"),
                     h.th("Language"),
-                    h.th("Result")                                        
+                    h.th("Result")                                                                               
                 )
             ),
             h.tbody(

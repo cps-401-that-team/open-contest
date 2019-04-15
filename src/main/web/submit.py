@@ -187,6 +187,15 @@ def changeStatus(params, setHeader, user):
     sub.save()
     return "ok"
 
+def resetCheckout(params, setHeader, user):
+    id = params["id"]    
+    sub = Submission.get(id)    
+    
+    if not sub:
+        return "Error: incorrect id"    
+    sub.checkout = None    
+    sub.save()
+    return "ok"
 
 def rejudge(params, setHeader, user):
     id = params["id"]
@@ -215,4 +224,5 @@ register.post("/changeStatus", "admin", changeStatus)
 register.post("/changeCheckout", "admin", checkout)
 register.post("/rejudge", "admin", rejudge)
 register.post("/rejudgeAll", "admin", rejudgeAll)
+register.post("/resetCheckout","admin",resetCheckout)
 
