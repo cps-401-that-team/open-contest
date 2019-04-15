@@ -72,7 +72,7 @@ def runCode(sub):
     results = []
     result = "ok"
 
-
+    sub.result = "review"
     for i in range(tests):
         inputs.append(sub.problem.testData[i].input)
         errors.append(readFile(f"/tmp/{sub.id}/out/err{i}.txt"))
