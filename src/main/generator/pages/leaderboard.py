@@ -33,9 +33,11 @@ def leaderboard(params, user):
         problemSummary[prob.id] = [0, 0]
 
     scores = []
+    tiebreaker = contest.tiebreaker
+
     for user in subs:
         usersubs = subs[user]
-        scor = score(usersubs, start, problemSummary)
+        scor = score(usersubs, start, problemSummary, tiebreaker)
         scores.append((
             User.get(user).username,
             scor[0],
@@ -104,7 +106,7 @@ def leaderboard(params, user):
         )
     )
 
-def score(submissions: list, contestStart, problemSummary) -> tuple:
+def score(submissions: list, contestStart, problemSummary,tiebreaker) -> tuple:
     """ Given a list of submissions by a particular user, calculate that user's score.
         Calculates score in ACM format. """
     
@@ -157,7 +159,7 @@ def score(submissions: list, contestStart, problemSummary) -> tuple:
             solvedProbs += 1
             penPoints += points
             problemSummary[sub.problem.id][1] += 1
-        elif sampleSolved:
+        elif sampleSolved and tiebreaker:
             sampleProbs += 1
     
     # The user's score is dependent on the number of solved problems and the number of penalty points

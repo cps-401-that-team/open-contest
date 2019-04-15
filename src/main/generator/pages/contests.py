@@ -34,7 +34,6 @@ class ProblemCard(UIElement):
 def editContest(params, user):
     id = params[0] if params else None
     contest = Contest.get(id)
-    
     title = "New Contest"
     chooseProblem = ""
     existingProblems = []
@@ -46,6 +45,7 @@ def editContest(params, user):
         h.option("On", value="On"),
         h.option("Off", value="Off")
     ]
+    tiebreaker =  True 
     if contest:
         title = contest.name
         start = contest.start
@@ -54,6 +54,7 @@ def editContest(params, user):
         showProblInfoBlocks = contest.showProblInfoBlocks
         if(showProblInfoBlocks == "Off"): 
             showProblInfoBlocks_option = [h.option("Off", value="Off"),h.option("On", value="On")]
+        tiebreaker = contest.tiebreaker
         chooseProblem = div(cls="actions", contents=[
             h.button("+ Choose Problem", cls="button", onclick="chooseProblemDialog()")
         ])
@@ -76,8 +77,11 @@ def editContest(params, user):
             div(cls="problem-cards", contents=problems)
         ]
     
+        
+
     return Page(
         h.input(type="hidden", id="contest-id", value=id),
+        h.input(type="hidden", id="test", value="test"),
         h.input(type="hidden", id="pageId", value="Contest"),
         h2(title, cls="page-title"),
         chooseProblem,
@@ -110,11 +114,22 @@ def editContest(params, user):
                     h.label(**{"for": "show-problem-info-blocks", "contents":"Show Problem Info Blocks"}),
                     h.select(cls="form-control custom-select", name="show-problem-info-blocks", id="show-problem-info-blocks", contents=showProblInfoBlocks_option)
                 ]),
-                h.input(type="hidden", id="scoreboardOff", value=scoreboardOff),                
+                
+                
+                h.input(type="hidden", id="scoreboardOff", value=scoreboardOff),
                 div(cls="form-group col-6", contents=[
                     h.label(**{"for": "scoreboard-off-time", "contents":"Turn Scoreboard Off Time"}),
                     h.input(cls="form-control", name="scoreboard-off-time", id="scoreboard-off-time", type="time")
-                ])                
+                ]),
+                # Tie breaker
+                h.input(type="hidden", id="tiebreaker", value=tiebreaker),
+                div(cls="form-group col-6", contents=[
+                    h.label(**{"for": "tie-breaker-bool", "contents":"Sample Data Breaks Ties"}),
+                    h.select(cls="form-control custom-select", name="tie-breaker-bool", id="tie-breaker-bool", contents=[
+                        h.option(("On")if     tiebreaker else ("Off"), value=("On")if     tiebreaker else ("Off")),
+                        h.option(("On")if not tiebreaker else ("Off"), value=("On")if not tiebreaker else ("Off"))
+                    ])
+                ]),               
             ]),
             div(cls="align-right col-12", contents=[
                 h.button("Save", cls="button", onclick="editContest()")
@@ -122,6 +137,7 @@ def editContest(params, user):
         ])),
         *existingProblems
     )
+    
 
 register.web("/contests$", "admin", listContests)
 register.web("/contests/([a-f0-9-]*)", "admin", editContest)
