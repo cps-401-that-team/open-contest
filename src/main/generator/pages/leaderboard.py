@@ -4,6 +4,7 @@ from code.generator.lib.page import *
 import logging
 from code.util import register
 import time
+from datetime import datetime
 
 all_languages = {
     "c": "C",
@@ -79,6 +80,7 @@ def leaderboard(params, user):
 
     problemSummaryDisplay = []
     for problem in contest.problems:
+        
         problemSummaryDisplay.append(h.tr(
             h.td(problem.title),
             h.td(problemSummary[problem.id][0], cls="center"),
@@ -88,7 +90,8 @@ def leaderboard(params, user):
     return Page(
         h2("Leaderboard", cls="page-title"),
         div(cls="actions", contents=[
-            h.button("Detailed Contest Report", cls="button create-message",onclick="window.location.href='/contestreport'")
+            h.button("Detailed Contest Report", cls="button create-message",onclick="window.location.href='/contestreport'"),
+            h.button("Correct Log Report", cls="button create-message",onclick="window.location.href='/correctboard'")
         ]),
         h.table(
             h.thead(
@@ -122,14 +125,13 @@ def leaderboard(params, user):
     )
 
 
-def contestreport(params, user):
+def contestreport(params, user):  
     contest = Contest.getCurrent() or Contest.getPast()
     if not contest:
         return Page(
-            h1("&nbsp;"),
+            h1(" "),
             h1("No Contest Available", cls="center")
-        )
-    
+        )  
     start = contest.start
     end = contest.end
     problemSummaryreport = []
@@ -287,6 +289,73 @@ def contestreport(params, user):
         )
     )
 
+
+
+def correctboard(params, user):
+
+    contest = Contest.getCurrent() or Contest.getPast()
+    if not contest:
+        return Page(
+            h1("&nbsp;"),
+            h1("No Contest Available", cls="center")
+        )
+    elif contest.scoreboardOff <= time.time() * 1000 and not user.isAdmin():
+        return Page(
+            h1("&nbsp;"),
+            h1("Scoreboard is off.", cls="center")
+        )
+
+    start = contest.start
+    end = contest.end
+ 
+    correct = []
+    for sub in Submission.all():
+        if start <= sub.timestamp <= end and sub.result == "ok" and not sub.user.isAdmin(): # USE THIS TOO
+            username = User.get(sub.user.id).username
+            title    = Problem.get(sub.problem.id).title
+            notinlist = True
+            
+            for c in correct:
+                if c.get("username") == username and c.get("title") == title and c.get("timestamp") > sub.timestamp:
+                    c["timestamp"] = sub.timestamp
+                    notinlist = False
+                    break
+                elif c.get("username") == username and c.get("title") == title and c.get("timestamp") < sub.timestamp:
+                    notinlist = False
+                    break
+            
+            if notinlist: correct.append({ "timestamp":sub.timestamp,"username":username,"title":title})
+                
+     
+    correct.sort(key=lambda item:item['timestamp'], reverse=True)
+    for c in correct:
+        c["timestamp"] = datetime.utcfromtimestamp(c["timestamp"] / 1000).strftime('%Y-%m-%d %H:%M:%S')
+
+    problemCorrectDisplay = []
+    for c in correct:
+        problemCorrectDisplay.append(h.tr(
+            h.td(c["timestamp"]),
+            h.td(c["username"], cls="center"),
+            h.td(c["title"], cls="center")
+        ))
+
+    return Page(
+        h2("Correct Log Report", cls="page-title"),
+        h.table(
+            h.thead(
+                h.tr(
+                    h.th("Date/Time"),
+                    h.th("Contestent", cls="center"),
+                    h.th("Problem", cls="center"),
+                )
+            ),
+            h.tbody(
+                *problemCorrectDisplay
+            )
+
+        )
+    )
+
 def score(submissions: list, contestStart, problemSummary,tiebreaker) -> tuple:
     """ Given a list of submissions by a particular user, calculate that user's score.
         Calculates score in ACM format. """
@@ -348,3 +417,4 @@ def score(submissions: list, contestStart, problemSummary,tiebreaker) -> tuple:
 
 register.web("/leaderboard", "loggedin", leaderboard)
 register.web("/contestreport", "loggedin", contestreport)
+register.web("/correctboard", "admin", correctboard)
