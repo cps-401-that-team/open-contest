@@ -547,6 +547,7 @@ Problem page
 
         var id = $("#prob-id").val();
         var problem = {id: id};
+        console.log(problem);
         problem.title       = $("#problem-title").val();
         problem.description = $("#problem-description").val();
         problem.statement   = mdEditors[0].value();
@@ -554,6 +555,7 @@ Problem page
         problem.output      = mdEditors[2].value();
         problem.constraints = mdEditors[3].value();
         problem.samples     = $("#problem-samples").val();
+        problem.probTime    = $("#problem-timelimit").val();
         testData = [];
         $(".test-data-cards .card").each((_, card) => {
             var input = $(card).find("code:eq(0)").html().replace(/<br>/g, "\n").replace(/<br\/>/g, "\n").replace(/&nbsp;/g, " ");
