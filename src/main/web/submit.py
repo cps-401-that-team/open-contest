@@ -55,23 +55,21 @@ def runCode(sub):
         f.write(sub.code.encode("utf-8"))
     
     prob = sub.problem
-    print("I made it here",sub.type)
     if sub.type == "test":
         tests = prob.samples 
     elif sub.type == "custom":
-        
         tests = 1
     else:
         tests = prob.tests     
     # Copy the input over to the tmp folder for the runner
     
-    
-    for i in range(tests):
-        if sub.type != "custom":
+    if sub.type != "custom":
+        for i in range(tests):
             shutil.copyfile(f"/db/problems/{prob.id}/input/in{i}.txt", f"/tmp/{sub.id}/in{i}.txt")
-        else:
-            with open(f"/tmp/{sub.id}/in{i}.txt", "w") as text_file:
-                text_file.write(sub.custominput)
+    else:
+        with open(f"/tmp/{sub.id}/in0.txt", "w") as text_file:
+            text_file.write(sub.custominput)
+            
         
 
 
@@ -81,7 +79,7 @@ def runCode(sub):
     # Run the runner
     if os.system(f"docker run --rm --network=none -m 256MB -v /tmp/{sub.id}/:/source nathantheinventor/open-contest-dev-{sub.language}-runner {tests} 5 > /tmp/{sub.id}/result.txt") != 0:
         raise Exception("Something went wrong")
-
+    
     inputs = []
     outputs = []
     answers = []
@@ -93,49 +91,60 @@ def runCode(sub):
     # TODO:
     # Fix this bug 
     # custom inpout when no test problems
-    for i in range(tests):
-        if sub.type == "custom":
-            inputs.append(sub.custominput)
-        else:
+    if sub.type != "custom":
+        for i in range(tests):
             inputs.append(sub.problem.testData[i].input)
-        errors.append(readFile(f"/tmp/{sub.id}/out/err{i}.txt"))
-        outputs.append(readFile(f"/tmp/{sub.id}/out/out{i}.txt"))
-        answers.append(sub.problem.testData[i].output)
+            errors.append(readFile(f"/tmp/{sub.id}/out/err{i}.txt"))
+            outputs.append(readFile(f"/tmp/{sub.id}/out/out{i}.txt"))
+            answers.append(sub.problem.testData[i].output)
 
-        anstrip = strip((answers[-1] or "").rstrip()).splitlines()
-        outstrip = strip((outputs[-1] or "").rstrip()).splitlines()
+            anstrip = strip((answers[-1] or "").rstrip()).splitlines()
+            outstrip = strip((outputs[-1] or "").rstrip()).splitlines()
 
-        res = readFile(f"/tmp/{sub.id}/out/result{i}.txt")
-        if res == "ok" and anstrip != outstrip:
-            extra = False
-            if len(anstrip) < len(outstrip):
-                extra = True
-            incomplete = False
-            
-            for i in range(len(outstrip)):
-                if i < len(anstrip):
-                    if anstrip[i] == outstrip[i]:
-                        incomplete = True
-                    else:
-                        extra = False
-            if len(anstrip) < len(outstrip):
+            res = readFile(f"/tmp/{sub.id}/out/result{i}.txt")
+            if res == "ok" and anstrip != outstrip:
+                extra = False
+                if len(anstrip) < len(outstrip):
+                    extra = True
                 incomplete = False
+                
+                for i in range(len(outstrip)):
+                    if i < len(anstrip):
+                        if anstrip[i] == outstrip[i]:
+                            incomplete = True
+                        else:
+                            extra = False
+                if len(anstrip) < len(outstrip):
+                    incomplete = False
 
-            if not extra and not incomplete:
-                res = "wrong_answer"
-            elif extra:
-                res = "extra_output"
-            else:
-                res = "incomplete_output"
-        if res == None:
-            res = "tle"
-        if sub.type == "custom":
-            res = "ok"
+                if not extra and not incomplete:
+                    res = "wrong_answer"
+                elif extra:
+                    res = "extra_output"
+                else:
+                    res = "incomplete_output"
+            if res == None:
+                res = "tle"
+            if sub.type == "custom":
+                res = "ok"
+            results.append(res)
+
+            # Make result the first incorrect result
+            if res != "ok" and result == "ok":
+                result = res
+    else:
+        inputs.append(sub.custominput)
+        errors.append(readFile(f"/tmp/{sub.id}/out/err0.txt"))
+        outputs.append(readFile(f"/tmp/{sub.id}/out/out0.txt"))
+        answers.append("")
+        
+        result = "ok"
+        res    = "ok"
         results.append(res)
 
-        # Make result the first incorrect result
-        if res != "ok" and result == "ok":
-            result = res
+            
+            
+
 
     sub.result = result    
     if(sub.result == "tle" or sub.result == "runtime_error" or sub.result == "ok"):
@@ -150,14 +159,13 @@ def runCode(sub):
         return
 
     sub.results = results
-    sub.inputs = inputs
+    sub.inputs  = inputs
     sub.outputs = outputs
     sub.answers = answers
-    sub.errors = errors
-
+    sub.errors  = errors
+    
     if sub.type == "submit":
         sub.save()
-
     shutil.rmtree(f"/tmp/{sub.id}", ignore_errors=True)
 
 def submit(params, setHeader, user):
@@ -238,7 +246,7 @@ def rejudgeAll(params, setHeader, user):
     id = params["id"]
     allsub = Submission.all()
     for i in allsub:
-        print(i.result)
+        #print(i.result)
         if i.problem.id == id and i.timestamp < ctime and i.result != 'reject':
             rejudge({'id':i.id}, None, None)
     return "Finished"

@@ -185,6 +185,9 @@ Problem page
             var tabs = "";
             var results = "";
             var samples = sub.results.length;
+            if(sub.type == "custom"){
+                samples = 1;
+            }
             for (var i = 0; i < samples; i ++) {
                 var res = sub.results[i];
                 var icon = icons[res];
@@ -198,13 +201,14 @@ Problem page
                 var output = sub.outputs[i];
                 var error = sub.errors[i];
                 var answer = sub.answers[i];
+                
                 var errorStr = `<div class="col-12">
                     <h4>Stderr Output</h4>
                     <code>${error.replace(/\n/g, "<br/>").replace(/ /g, "&nbsp;")}</code>
                 </div>`;
                 if (!error) {
                     errorStr = "";
-                }
+                }                
                 if (sub.type ==  "test"){
                     results += `<div id="tabs-${i}">
                     <div class="row">
@@ -796,7 +800,7 @@ Judging Page
         $(".rejudge").addClass("button-gray");
         $(".download").attr("disabled", true);
         $(".download").addClass("button-gray");
-        console.log("HI go away")
+        
         $.post("/rejudge", {id: id}, data => {
             $(".rejudge").attr("disabled", false);
             $(".rejudge").removeClass("button-gray");
