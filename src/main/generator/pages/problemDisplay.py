@@ -37,8 +37,6 @@ def getSample(datum, num: int) -> Card:
 def viewProblem(params, user):
     problem = Problem.get(params[0])
     
-    contest = Contest.getCurrent()
-    
     if not problem:
         return ""
 
@@ -48,58 +46,33 @@ def viewProblem(params, user):
             return ""
         if problem not in Contest.getCurrent().problems:
             return ""
-    if(contest.showProblInfoBlocks == "Off"):
-        return Page(
-            h.input(type="hidden", id="problem-id", value=problem.id),
-            h2(problem.title, cls="page-title"), 
-            div(cls="problem-description", contents=[
-                div(cls="samples", contents=list(map(lambda x: getSample(x[0], x[1]), zip(problem.sampleData, range(problem.samples)))))
-            ]),           
-            CodeEditor(),
-            div(cls="align-right", contents=[
-                h.button("Test Code", cls="button test-samples button-white"),
-                h.button("Submit Code", cls="button submit-problem")
-            ])
-        )
-    else:        
-        return Page(
-            h.input(type="hidden", id="problem-id", value=problem.id),
-            h2(problem.title, cls="page-title"),
-            div(cls="problem-description", contents=[
-                Card("Problem Statement", formatMD(problem.statement), cls="stmt"),
-                Card("Input Format", formatMD(problem.input), cls="inp"),
-                Card("Output Format", formatMD(problem.output), cls="outp"),
-                Card("Constraints", formatMD(problem.constraints), cls="constraints"),
-                div(cls="samples", contents=list(map(lambda x: getSample(x[0], x[1]), zip(problem.sampleData, range(problem.samples)))))
-            ]),
-            CodeEditor(),
-            div(cls="stmt card ui-sortable-handle", contents=[
-                div(cls="card-header", contents=[h2("Custom Input", cls="card-title")]),
-                div(cls="card-contents", contents=[h.textarea(id="custom-input", cls="col-12")])
-            ]),
-            div(cls="align-right",id="custom-code-text", contents=[
-                h.button("Test Custom Code", cls="button test-custom button-white"),
-                h.button("Test Code", cls="button test-samples button-white"),
-                h.button("Submit Code", cls="button submit-problem")
-            ])
-        )
+    
+    return Page(
+        h.input(type="hidden", id="problem-id", value=problem.id),
+        h2(problem.title, cls="page-title"),
+        div(cls="problem-description", contents=[
+            Card("Problem Statement", formatMD(problem.statement), cls="stmt"),
+            Card("Input Format", formatMD(problem.input), cls="inp"),
+            Card("Output Format", formatMD(problem.output), cls="outp"),
+            Card("Constraints", formatMD(problem.constraints), cls="constraints"),
+            div(cls="samples", contents=list(map(lambda x: getSample(x[0], x[1]), zip(problem.sampleData, range(problem.samples)))))
+        ]),
+        CodeEditor(),
+        div(cls="align-right", contents=[
+            h.button("Test Code", cls="button test-samples button-white"),
+            h.button("Submit Code", cls="button submit-problem")
+        ])
+    )
 
 def listProblems(params, user):
     if Contest.getCurrent():
         contest = Contest.getCurrent()
         probCards = []
-       
         for prob in contest.problems:
-            probid = f"/problems/{prob.id}"
-
-            button = """ <button type="button" onclick="rejudgeAll('?')" class="btn btn-primary rejudge" id="rejudgebutton?" style="position:relative; z-index: 5">
-                            Rejudge All
-                        </button>""".replace('?', probid.split('/')[-1])
-            
             probCards.append(Card(
-                prob.title+ (button if user.isAdmin() else ""),
+                prob.title,
                 prob.description,
-                probid
+                f"/problems/{prob.id}"
             ))
         return Page(
             h2("Problems", cls="page-title"),
@@ -124,4 +97,3 @@ def listProblems(params, user):
 
 register.web("/problems$", "loggedin", listProblems)
 register.web("/problems/([0-9a-f-]+)", "loggedin", viewProblem)
-

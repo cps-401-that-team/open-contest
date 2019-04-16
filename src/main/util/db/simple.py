@@ -3,8 +3,6 @@ import os
 import logging
 import shutil
 
-MAX_OUTPUT_LENGTH = 10000000
-
 def ensureExists(file: str, isDir: bool = False):
     cur = "/"
     for part in file.split("/")[:-1]:
@@ -29,13 +27,6 @@ def setKey(key: str, value):
     ensureExists("/db" + key)
     with open("/db" + key, "w") as f:
         if isinstance(value, dict) or isinstance(value, list):
-            if("outputs" in value):                                                                     
-                out = ""
-                for o in value["outputs"]:                    
-                    out = o
-                    break                
-                if(len(out) > MAX_OUTPUT_LENGTH):
-                    value["outputs"] = [out[:MAX_OUTPUT_LENGTH],None]
             f.write(json.dumps(value))
         else:
             f.write(value)

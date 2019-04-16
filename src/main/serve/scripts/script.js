@@ -162,17 +162,13 @@ Problem page
         "ok": "check",
         "wrong_answer": "times",
         "tle": "clock",
-        "runtime_error": "exclamation-triangle",
-        "extra_output": "times",
-        "incomplete_output": "times"
+        "runtime_error": "exclamation-triangle"
     };
     var verdict_name = {
         "ok": "Accepted",
         "wrong_answer": "Wrong Answer",
         "tle": "Time Limit Exceeded",
-        "runtime_error": "Runtime Error",
-        "extra_output": "Extra Output",
-        "incomplete_output": "Incomplete output"
+        "runtime_error": "Runtime Error"
     };
 
     function showResults(sub) {
@@ -181,36 +177,27 @@ Problem page
                 <h3>Compile Error</h3>
                 <code>${sub.compile.replace(/\n/g, "<br/>").replace(/ /g, "&nbsp;")}</code>
             `);
-        } else if (sub.type == "test" || sub.type == "custom") {
+        } else if (sub.type == "test") {
             var tabs = "";
             var results = "";
             var samples = sub.results.length;
-            if(sub.type == "custom"){
-                samples = 1;
-            }
             for (var i = 0; i < samples; i ++) {
                 var res = sub.results[i];
                 var icon = icons[res];
-                if (sub.type ==  "test"){
-                    tabs += `<li><a href="#tabs-${i}"><i class="fa fa-${icon}" title="${verdict_name[res]}"></i> Sample #${i}</a></li>`;
-                }
-                if(sub.type == "custom"){
-                    tabs += `<li><a href="#tabs-${i}"><i class="fa fa-${icon}" title="${verdict_name[res]}"></i> Custom </a></li>`;
-                }
+                tabs += `<li><a href="#tabs-${i}"><i class="fa fa-${icon}" title="${verdict_name[res]}"></i> Sample #${i}</a></li>`;
+
                 var input = sub.inputs[i];
                 var output = sub.outputs[i];
                 var error = sub.errors[i];
                 var answer = sub.answers[i];
-                
                 var errorStr = `<div class="col-12">
                     <h4>Stderr Output</h4>
                     <code>${error.replace(/\n/g, "<br/>").replace(/ /g, "&nbsp;")}</code>
                 </div>`;
                 if (!error) {
                     errorStr = "";
-                }                
-                if (sub.type ==  "test"){
-                    results += `<div id="tabs-${i}">
+                }
+                results += `<div id="tabs-${i}">
                     <div class="row">
                         <div class="col-12">
                             <h4>Input</h4>
@@ -227,23 +214,6 @@ Problem page
                         ${errorStr}
                     </div>
                 </div>`;
-                }
-                if(sub.type == "custom"){
-                    results += `<div id="tabs-${i}">
-                    <div class="row">
-                        <div class="col-12">
-                            <h4>Your Input</h4>
-                            <code>${input.replace(/\n/g, "<br/>").replace(/ /g, "&nbsp;")}</code>
-                        </div>
-                        <div class="col-12">
-                            <h4>Your Output</h4>
-                            <code>${output.replace(/\n/g, "<br/>").replace(/ /g, "&nbsp;")}</code>
-                        </div>
-                        ${errorStr}
-                    </div>
-                </div>`;
-                }
-                
             }
             $(".results.card .card-contents").html(`<div id="result-tabs">
                 <ul>
@@ -306,9 +276,6 @@ Problem page
             $(".submit-problem").addClass("button-gray");
             $(".test-samples").attr("disabled", true);
             $(".test-samples").addClass("button-gray");
-            $(".test-custom").attr("disabled", true);
-            $(".test-custom").addClass("button-gray");
-            
         }
 
         function enableButtons() {
@@ -316,8 +283,6 @@ Problem page
             $(".submit-problem").removeClass("button-gray");
             $(".test-samples").attr("disabled", false);
             $(".test-samples").removeClass("button-gray");
-            $(".test-custom").attr("disabled", false);
-            $(".test-custom").removeClass("button-gray");
         }
 
         // When you click the submit button, submit the code to the server
@@ -337,18 +302,6 @@ Problem page
             var code = editor.getValue();
             disableButtons();
             $.post("/submit", {problem: thisProblem, language: language, code: code, type: "test"}, results => {
-                enableButtons();
-                showResults(results);
-            });
-        });
-
-        // When you click the test custom input code button, test the code with custom input
-        $("button.test-custom").click(_ => {
-            createResultsCard();
-            var code = editor.getValue();
-            var input = $("#custom-input").val();
-            disableButtons();
-            $.post("/submit", {problem: thisProblem, language: language, code: code, type: "custom", input:input}, results => {
                 enableButtons();
                 showResults(results);
             });
@@ -462,12 +415,19 @@ Contest page
         var endDate = $("#contest-end-date").val();
         var endTime = $("#contest-end-time").val();
         var scoreboardOffTime = $("#scoreboard-off-time").val();
-        var showProblInfoBlocks = $("#show-problem-info-blocks").val();
-        var tiebreaker = $("#tie-breaker-bool").val();
 
-        var start = new Date(`${startDate} ${startTime}`).getTime();
-        var end = new Date(`${endDate} ${endTime}`).getTime();
-        var endScoreboard = new Date(`${endDate} ${scoreboardOffTime}`).getTime();
+
+        // Invalid DATE format; "T" after the date and "Z" after the time have been inserted 
+        // for the correct format for creating the Dates, then the milliseconds are adjusted 
+        // for the correct time zone for each of the following variables, since "Z" assumes you
+        // are entering a UTC time.
+
+        var start = new Date(`${startDate}T${startTime}Z`);
+        start = start.getTime() + (start.getTimezoneOffset() * 60000);
+        var end = new Date(`${endDate}T${endTime}Z`);
+        end = end.getTime() + (end.getTimezoneOffset() * 60000);
+        var endScoreboard = new Date(`${endDate}T${scoreboardOffTime}Z`);
+        endScoreboard = endScoreboard.getTime() + (endScoreboard.getTimezoneOffset() * 60000);
 
         if (end <= start) {
             alert("The end of the contest must be after the start.");
@@ -495,7 +455,7 @@ Contest page
             problems.push(newProblem);
         }
 
-        $.post("/editContest", {id: id, name: name, start: start, end: end,showProblInfoBlocks: showProblInfoBlocks, tiebreaker:tiebreaker, scoreboardOff: endScoreboard, problems: JSON.stringify(problems)}, id => {
+        $.post("/editContest", {id: id, name: name, start: start, end: end, scoreboardOff: endScoreboard, problems: JSON.stringify(problems)}, id => {
             if (window.location.pathname == "/contests/new") {
                 window.location = `/contests/${id}`;
             } else {
@@ -716,66 +676,17 @@ Messages Page
 /*--------------------------------------------------------------------------------------------------
 Judging Page
 --------------------------------------------------------------------------------------------------*/
-    function changeSubmissionResult(id, version) {
+    function changeSubmissionResult(id) {
         var result = $(`.result-choice.${id}`).val();
-        $.post("/changeResult", {id: id, version:version, result: result}, result => {
+        $.post("/changeResult", {id: id, result: result}, result => {
             if (result == "ok") {
-                window.location.reload();                
-            } else if(result == "vErr"){
-                changePopup(id);
+                window.location.reload();
             } else {
                 alert(result);
             }
         })
     }
-    function checkout(user_id,subm_id){
-        var result = $(`.change-checkout`).val();
-        $.post("/changeCheckout", {user_id: user_id, subm_id:subm_id, result: result}, result => {            
-            if (result == "ok") {                
-                overridePopup(subm_id);
-            } else if(result == "noChange") {
-                window.location.reload();
-            } else{
-                alert(result);
-            }      
-        })
-    }
-    // /resetCheckout
-    function resetCheckout(id){
-        $.post("/resetCheckout", {id:id}, result => {            
-            if (result != "ok") {                
-                alert(result);
-            }    
-        })
-    }
-    function changeSubmissionStatus(id, version) {
-        var result = $(`.submission-status.${id}`).val();
-        $.post("/changeStatus", {id: id, version:version, result: result}, result => {            
-            if (result == "ok") {
-                window.location.reload();
-            } else if(result == "vErr"){
-                changePopup(id);
-            } else {
-                alert(result);
-            }          
-        })
-    }
-    function overridePopup(id) {
-        $.post(`/judgeOverride/${id}`, {}, data => {
-            $(".modal-dialog").html(data);
-            $(".result-tabs").tabs();
-            fixFormatting();
-            $(".modal").modal();
-        });
-    }
-    function changePopup(id) {
-        $.post(`/versionChange/${id}`, {}, data => {
-            $(".modal-dialog").html(data);
-            $(".result-tabs").tabs();
-            fixFormatting();
-            $(".modal").modal();
-        });
-    }
+
     function submissionPopup(id) {
         $.post(`/judgeSubmission/${id}`, {}, data => {
             $(".modal-dialog").html(data);
@@ -785,42 +696,13 @@ Judging Page
         });
     }
 
-    function rejudgeAll(id)
-    {
-        $(`#rejudgebutton${id}`).attr("disabled", true);
-        $.post("/rejudgeAll", {id:id}, data =>{
-            $(`#rejudgebutton${id}`).attr("disabled", false);
-            alert("DONE");
-        });
-
-    }
-
     function rejudge(id) {
         $(".rejudge").attr("disabled", true);
         $(".rejudge").addClass("button-gray");
-        $(".download").attr("disabled", true);
-        $(".download").addClass("button-gray");
-        
+
         $.post("/rejudge", {id: id}, data => {
             $(".rejudge").attr("disabled", false);
             $(".rejudge").removeClass("button-gray");
-            $(".download").attr("disabled", false);
-            $(".download").removeClass("button-gray");
             alert(`New Result: ${verdict_name[data]}`);
-        });
-    }
-
-    function download(id) {
-        var zip = new JSZip();
-        
-        $.post(`/downloadsubmission/${id}`, {}, data => {
-            $.each(JSON.parse(data), function(filename, content) { 
-                zip.file(filename,content);
-            });
-
-            zip.generateAsync({type:"blob"})
-            .then(function(content) {
-                saveAs(content, `submission_${id}.zip`);
-            });
         });
     }
