@@ -571,10 +571,10 @@ Problem page
     }
 
     function createTestData(info) {
-        console.log("entered the function");
+      
         var input = $(".test-data-input").val();
         var output = $(".test-data-output").val();
-        console.log("leaving the function");
+      
         editProblem({input: input, output: output},info);
     }
 
@@ -586,7 +586,7 @@ Problem page
             return;
         }
         handlingClick = true;
-        console.log("made it edit");
+      
         var id = $("#prob-id").val();
         var problem = {id: id};
         problem.title       = $("#problem-title").val();
@@ -611,7 +611,7 @@ Problem page
             var output = $(card).find("code:eq(1)").html().replace(/<br>/g, "\n").replace(/<br\/>/g, "\n").replace(/&nbsp;/g, " ");
             testData.push({input: input, output: output});
         });
-        console.log("here");
+        
         if (newTest != undefined) {
             testData.push(newTest);
         }
