@@ -38,6 +38,7 @@ class Problem:
             self.tests       = int(details["tests"])
             self.sampleData  = [Datum.get(id, i) for i in range(self.samples)]
             self.testData    = [Datum.get(id, i) for i in range(self.tests)]
+            self.probTime    = int(details["probTime"])
         else:
             self.id          = None
             self.title       = None
@@ -50,6 +51,8 @@ class Problem:
             self.tests       = 0
             self.sampleData  = []
             self.testData    = []
+            self.probTime    = 5
+            
 
     def get(id: str):
         with lock.gen_rlock():
@@ -68,6 +71,7 @@ class Problem:
             "constraints": self.constraints,
             "samples":     self.samples,
             "tests":       self.tests,
+            "probTime":    self.probTime,
         }
 
     def save(self):

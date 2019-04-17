@@ -571,8 +571,10 @@ Problem page
     }
 
     function createTestData() {
+        console.log("entered the function");
         var input = $(".test-data-input").val();
         var output = $(".test-data-output").val();
+        console.log("leaving the function");
         editProblem({input: input, output: output});
     }
 
@@ -584,7 +586,7 @@ Problem page
             return;
         }
         handlingClick = true;
-
+        console.log("made it edit");
         var id = $("#prob-id").val();
         var problem = {id: id};
         problem.title       = $("#problem-title").val();
@@ -594,12 +596,14 @@ Problem page
         problem.output      = mdEditors[2].value();
         problem.constraints = mdEditors[3].value();
         problem.samples     = $("#problem-samples").val();
+        problem.probTime    = $("#problem-timelimit").val();
         testData = [];
         $(".test-data-cards .card").each((_, card) => {
             var input = $(card).find("code:eq(0)").html().replace(/<br>/g, "\n").replace(/<br\/>/g, "\n").replace(/&nbsp;/g, " ");
             var output = $(card).find("code:eq(1)").html().replace(/<br>/g, "\n").replace(/<br\/>/g, "\n").replace(/&nbsp;/g, " ");
             testData.push({input: input, output: output});
         });
+        console.log("here");
         if (newTest != undefined) {
             testData.push(newTest);
         }

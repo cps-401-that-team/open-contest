@@ -41,7 +41,7 @@ def editProblem(params, user):
     probId = params[0]
     prob = Problem.get(probId)
     contest = Contest.getCurrent()
-    if(contest.showProblInfoBlocks == "Off"):
+    if(contest != None and contest.showProblInfoBlocks == "Off"):
         return Page(
             h.input(type="hidden", id="prob-id", value=probId),
             h.input(type="hidden", id="pageId", value="Problem"),
@@ -63,6 +63,10 @@ def editProblem(params, user):
                     div(cls="form-group col-12", contents=[
                         h.label(**{"for": "problem-samples", "contents":"Number of Sample Cases"}),
                         h.input(cls="form-control", type="number", name="problem-samples", id="problem-samples", value=prob.samples)
+                    ]),
+                    div(cls="form-group col-12", contents=[
+                        h.label(**{"for": "problem-timelimit", "contents":"Max time"}),
+                        h.input(cls="form-control", type="number", name="problem-timelimit", id="problem-timelimit", value=prob.probTime)
                     ]),
                 ]),
                 div(cls="align-right col-12", contents=[
@@ -123,6 +127,10 @@ def editProblem(params, user):
                         h.label(**{"for": "problem-samples", "contents":"Number of Sample Cases"}),
                         h.input(cls="form-control", type="number", name="problem-samples", id="problem-samples", value=prob.samples)
                     ]),
+                    div(cls="form-group col-12", contents=[
+                        h.label(**{"for": "problem-timelimit", "contents":"Max time"}),
+                        h.input(cls="form-control", type="number", name="problem-timelimit", id="problem-timelimit", value=prob.probTime)
+                    ]),
                 ]),
                 div(cls="align-right col-12", contents=[
                     h.button("Save", cls="button", onclick="editProblem()")
@@ -177,6 +185,10 @@ def newProblem(params, user):
                 ]),
                 div(cls="form-group col-12", contents=[
                     h.input(cls="form-control", type="hidden", name="problem-samples", id="problem-samples", value=0)
+                ]),
+                div(cls="form-group col-12", contents=[
+                    h.label(**{"for": "problem-timelimit", "contents":"Max time"}),
+                    h.input(cls="form-control", type="number", name="problem-timelimit", id="problem-timelimit", value=5)
                 ]),
             ]),
             div(cls="align-right col-12", contents=[

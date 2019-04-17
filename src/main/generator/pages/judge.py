@@ -84,8 +84,11 @@ def markDiffLines(list1,list2):
 
     #diff wrapers
     spanred = '<span style="background:red">' #red=lines are different
-    spangreen = '<span style="background:green">'#green = line only exists in this list
+    spangreen = '<span style="background:#19ad19">'#green = line only exists in this list
+    spanlightred = '<p style="margin:0;background:#ff9999">'
+    spanlightgreen ='<p style="margin:0;background:#1aff1a">'
     end = '</span>'
+    lightend = '</p>'
     rows = 0
 
     if len(list1) > len(list2):
@@ -103,29 +106,29 @@ def markDiffLines(list1,list2):
             sl = 0
             tempbig = ''
             tempsmall = ''
+            same = True
             #find matching sections of strings
             for match in SequenceMatcher(None, big[i], small[i]).get_matching_blocks():
-           
-                if True or match.a < len(big[i]):
-
-                    #mark sections that differ from the other string
-                    tempbig += (((spanred if big==list1 else spangreen) + big[i][bl:match.a]+ end) if len(big[i][bl:match.a]) > 0 else "") + big[i][match.a:match.a+match.size]
-                 
-                    bl = match.a+match.size
-                    
-                                                    
-                    tempsmall += (( (spanred if small==list1 else spangreen)+ small[i][sl:match.b]+ end) if len(small[i][sl:match.b]) > 0 else "") + small[i][match.b:match.b+match.size]
-                    sl = match.b+match.size
+                if same and match.a != big[i][-1]:
+                    same = False
+                #mark sections that differ from the other string
+                tempbig += (((spanred if big==list1 else spangreen) + big[i][bl:match.a]+ end) if len(big[i][bl:match.a]) > 0 else "") + big[i][match.a:match.a+match.size]
+                bl = match.a+match.size
+                                                 
+                tempsmall += (( (spanred if small==list1 else spangreen)+ small[i][sl:match.b]+ end) if len(small[i][sl:match.b]) > 0 else "") + small[i][match.b:match.b+match.size]
+                sl = match.b+match.size
                 
-
-            big[i] = tempbig
-            small[i] = tempsmall
+            if not same:
+                big[i] = (spanlightred if big == list1 else spanlightgreen) + tempbig + lightend
+                small[i] = (spanlightred if small == list1 else spanlightgreen) + tempsmall + lightend
+            else:
+                big[i] = tempbig
+                small[i] = tempsmall
 
         else:
-            big[i] = (spanred if big==list1 else spangreen)+big[i].replace("\n", "</span>\n")
-            if big[i][-1] != '\n':
-                big[i] = big[i]+'</span>\n'
-
+            big[i] = (spanlightred if big==list1 else spanlightgreen)+big[i]+lightend
+           
+                
 
 
 
@@ -134,8 +137,8 @@ class TestCaseData(UIElement):
         num, input, output, error, answer = x
 
         #prepare formmat for function
-        answer = answer.replace(" ", "&nbsp;").splitlines(keepends=True)
-        output = output.replace(" ", "&nbsp;").splitlines(keepends=True)
+        answer = answer.replace(" ", "&nbsp;").splitlines()
+        output = output.replace(" ", "&nbsp;").splitlines()
 
         #modify output and answer strings to display differences by color
         markDiffLines(output,answer)
@@ -155,12 +158,12 @@ class TestCaseData(UIElement):
             div(cls="row", contents=[
                 div(cls="col-6", contents=[
                     h.h4("Output"),
-                    h.code(output.replace("\n", "<br/>"))
+                    h.code(output)
                     
                 ]),
                 div(cls="col-6", contents=[
                     h.h4("Correct Answer"),
-                    h.code(answer.replace("\n", "<br/>"))
+                    h.code(answer)
                 ])
             ])
         ])
