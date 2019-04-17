@@ -80,7 +80,7 @@ class TestCaseTab(UIElement):
             ])
         )
 
-def markDiffLines(list1,list2):
+def markDiffLines(user,ans):
 
     #diff wrapers
     spanred = '<span style="background:red">' #red=lines are different
@@ -91,14 +91,14 @@ def markDiffLines(list1,list2):
     lightend = '</p>'
     rows = 0
 
-    if len(list1) > len(list2):
-        rows = len(list1)
-        big = list1
-        small = list2
+    if len(user) > len(ans):
+        rows = len(user)
+        big = user
+        small = ans
     else:
-        rows = len(list2)
-        big = list2
-        small = list1
+        rows = len(ans)
+        big = ans
+        small = user
 
     for i in range(rows):
         if i < len(small):
@@ -112,21 +112,21 @@ def markDiffLines(list1,list2):
                 if same and match.a != big[i][-1]:
                     same = False
                 #mark sections that differ from the other string
-                tempbig += (((spanred if big==list1 else spangreen) + big[i][bl:match.a]+ end) if len(big[i][bl:match.a]) > 0 else "") + big[i][match.a:match.a+match.size]
+                tempbig += (((spanred if big==user else spangreen) + big[i][bl:match.a]+ end) if len(big[i][bl:match.a]) > 0 else "") + big[i][match.a:match.a+match.size]
                 bl = match.a+match.size
                                                  
-                tempsmall += (( (spanred if small==list1 else spangreen)+ small[i][sl:match.b]+ end) if len(small[i][sl:match.b]) > 0 else "") + small[i][match.b:match.b+match.size]
+                tempsmall += (( (spanred if small==user else spangreen)+ small[i][sl:match.b]+ end) if len(small[i][sl:match.b]) > 0 else "") + small[i][match.b:match.b+match.size]
                 sl = match.b+match.size
                 
             if not same:
-                big[i] = (spanlightred if big == list1 else spanlightgreen) + tempbig + lightend
-                small[i] = (spanlightred if small == list1 else spanlightgreen) + tempsmall + lightend
+                big[i] = (spanlightred if big == user else spanlightgreen) + tempbig + lightend
+                small[i] = (spanlightred if small == user else spanlightgreen) + tempsmall + lightend
             else:
                 big[i] = tempbig
                 small[i] = tempsmall
 
         else:
-            big[i] = (spanlightred if big==list1 else spanlightgreen)+big[i]+lightend
+            big[i] = (spanlightred if big==user else spanlightgreen)+big[i]+lightend
            
                 
 
