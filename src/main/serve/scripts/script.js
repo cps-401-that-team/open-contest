@@ -570,16 +570,16 @@ Problem page
         $("div.modal").modal();
     }
 
-    function createTestData() {
+    function createTestData(info) {
         console.log("entered the function");
         var input = $(".test-data-input").val();
         var output = $(".test-data-output").val();
         console.log("leaving the function");
-        editProblem({input: input, output: output});
+        editProblem({input: input, output: output},info);
     }
 
     var handlingClick = false;
-    function editProblem(newTest=undefined) {
+    function editProblem(newTest=undefined, info=undefined) {
         // Eliminate double-click problem
         if (handlingClick) {
             // User has already clicked the button recently and the request isn't done
@@ -591,10 +591,18 @@ Problem page
         var problem = {id: id};
         problem.title       = $("#problem-title").val();
         problem.description = $("#problem-description").val();
+        if(info === 0){
         problem.statement   = mdEditors[0].value();
         problem.input       = mdEditors[1].value();
         problem.output      = mdEditors[2].value();
         problem.constraints = mdEditors[3].value();
+        }else
+        {
+            problem.statement   = "empty";
+            problem.input       = "empty";
+            problem.output      = "empty";
+            problem.constraints = "empty";
+        }
         problem.samples     = $("#problem-samples").val();
         problem.probTime    = $("#problem-timelimit").val();
         testData = [];

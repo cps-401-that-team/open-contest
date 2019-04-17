@@ -68,6 +68,10 @@ def editProblem(params, user):
                         h.label(**{"for": "problem-timelimit", "contents":"Max time"}),
                         h.input(cls="form-control", type="number", name="problem-timelimit", id="problem-timelimit", value=prob.probTime)
                     ]),
+                    div(cls="form-group col-12", contents=[
+                    h.input(cls="form-control", type="hidden", name="infoblocks", id="problem-samples", value=True)
+                    ]),
+                     
                 ]),
                 div(cls="align-right col-12", contents=[
                     h.button("Save", cls="button", onclick="editProblem()")
@@ -83,7 +87,7 @@ def editProblem(params, user):
                 ),
                 div(
                     h.button("Cancel", **{"type":"button", "class": "button button-white", "data-dismiss": "modal"}),
-                    h.button("Add Test Data", **{"type":"button", "class": "button", "onclick": "createTestData()"})
+                    h.button("Add Test Data", **{"type":"button", "class": "button", "onclick": "createTestData(1)"})
                 )
             ),
             div(cls="test-data-cards", contents=list(map(TestDataCard, zip(range(prob.tests), prob.testData, [prob.samples] * prob.tests))))
@@ -146,7 +150,7 @@ def editProblem(params, user):
                 ),
                 div(
                     h.button("Cancel", **{"type":"button", "class": "button button-white", "data-dismiss": "modal"}),
-                    h.button("Add Test Data", **{"type":"button", "class": "button", "onclick": "createTestData()"})
+                    h.button("Add Test Data", **{"type":"button", "class": "button", "onclick": "createTestData(0)"})
                 )
             ),
             div(cls="test-data-cards", contents=list(map(TestDataCard, zip(range(prob.tests), prob.testData, [prob.samples] * prob.tests))))
