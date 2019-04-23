@@ -2,9 +2,10 @@ from code.util.db import getKey, setKey, listSubKeys, deleteKey, User, Problem
 from uuid import uuid4
 import logging
 from readerwriterlock import rwlock
+from sys import getsizeof
 
 lock = rwlock.RWLockWrite()
-
+MAX_OUTPUT_DISPLAY_LENGTH = 5000
 submissions = {}
 
 class Submission:
@@ -45,6 +46,7 @@ class Submission:
     def get(id: str):
         with lock.gen_rlock():
             if id in submissions:
+                getsizeof(submissions[id])
                 return submissions[id]
         return None
     
@@ -69,8 +71,11 @@ class Submission:
     def save(self):
         with lock.gen_wlock():
             if self.id == None:
-                self.id = str(uuid4())
+                self.id = str(uuid4())                
                 submissions[self.id] = self
+            if(len(self.outputs) > 0 and len(self.outputs[0]) > MAX_OUTPUT_DISPLAY_LENGTH):
+                print(len(self.outputs[0]))
+                self.outputs.insert(0,self.outputs[0][:MAX_OUTPUT_DISPLAY_LENGTH] + " ...additional data not displayed...")
             setKey(f"/submissions/{self.id}/submission.json", self.toJSONSimple())
         for callback in Submission.saveCallbacks:
             callback(self)
